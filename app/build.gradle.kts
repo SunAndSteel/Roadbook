@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.carnetconduite"
-        minSdk = 26
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -72,6 +72,7 @@ dependencies {
 
     implementation(libs.material)
     implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation("androidx.navigation:navigation-compose:2.7.6")
 
     // Room Database
     implementation(libs.androidx.room.runtime)
