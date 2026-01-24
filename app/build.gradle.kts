@@ -71,6 +71,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     implementation(libs.material)
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
 
     // Room Database
     implementation(libs.androidx.room.runtime)

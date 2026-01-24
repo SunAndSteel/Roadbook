@@ -13,16 +13,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.theme.CarnetConduiteTheme
+import com.florent.carnetconduite.ui.theme.ThemeMode
+import com.florent.carnetconduite.ui.theme.ThemePreferences
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,8 +36,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CarnetConduiteTheme {
-                DrivingLogApp()
+            val context = this
+
+            val themeMode by ThemePreferences
+                .getThemeMode(context)
+                .collectAsState(initial = ThemeMode.Dynamic)
+
+            CarnetConduiteTheme(themeMode = themeMode) {
+                DrivingLogApp(
+                    themeMode = themeMode,
+                    onChangeTheme = {
+                        val next = when (themeMode) {
+                            ThemeMode.Dynamic -> ThemeMode.Light
+                            ThemeMode.Light -> ThemeMode.Dark
+                            ThemeMode.Dark -> ThemeMode.Dynamic
+                        }
+
+                        lifecycleScope.launch {
+                            ThemePreferences.saveThemeMode(context, next)
+                        }
+                    }
+                )
             }
         }
     }
@@ -40,7 +64,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrivingLogApp(viewModel: DrivingViewModel = viewModel()) {
+fun DrivingLogApp(
+    viewModel: DrivingViewModel = viewModel() ,
+    themeMode: ThemeMode,
+    onChangeTheme: () -> Unit
+) {
     // Collecte de l'état des trajets depuis le Flow
     val trips by viewModel.trips.collectAsState()
 
@@ -48,14 +76,17 @@ fun DrivingLogApp(viewModel: DrivingViewModel = viewModel()) {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Carnet de Conduite") },
+                title = { Text("Roadbook") },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 actions = {
-                    IconButton(onClick = { /* Export Logic */ }) {
-                        Icon(Icons.Default.FileDownload, "Export CSV")
+                    IconButton(onClick = onChangeTheme) {
+                        Icon(
+                            imageVector = themeIcon(themeMode),
+                            contentDescription = "Changer le thème"
+                        )
                     }
                 }
             )
@@ -382,4 +413,11 @@ fun TripCard(trip: Trip, seanceNumber: Int, onEdit: () -> Unit, onDelete: () -> 
             }
         }
     }
+}
+
+@Composable
+fun themeIcon(themeMode: ThemeMode) = when (themeMode) {
+    ThemeMode.Dynamic -> Icons.Default.AutoAwesome
+    ThemeMode.Light -> Icons.Default.LightMode
+    ThemeMode.Dark -> Icons.Default.DarkMode
 }
