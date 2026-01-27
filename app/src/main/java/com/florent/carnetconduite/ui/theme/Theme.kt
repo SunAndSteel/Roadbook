@@ -1,9 +1,12 @@
 package com.florent.carnetconduite.ui.theme
 
 import android.os.Build
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 
 // --- MODE DE THÈME ---
@@ -74,4 +77,11 @@ fun CarnetConduiteTheme(
         colorScheme = colorScheme,
         content = content
     )
+}
+
+@Composable
+fun themeIcon(themeMode: ThemeMode): ImageVector = when (themeMode) {
+    ThemeMode.Dynamic -> Icons.Default.AutoAwesome
+    ThemeMode.Light -> Icons.Default.LightMode
+    ThemeMode.Dark -> Icons.Default.DarkMode
 }

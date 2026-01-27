@@ -4,8 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.florent.carnetconduite.data.*
-import com.florent.carnetconduite.domain.TripGroup
-import com.florent.carnetconduite.domain.groupTrips
+import com.florent.carnetconduite.domain.models.TripGroup
+import com.florent.carnetconduite.domain.models.groupTrips
+import com.florent.carnetconduite.repository.TripRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

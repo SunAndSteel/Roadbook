@@ -1,6 +1,9 @@
-package com.florent.carnetconduite.data
+package com.florent.carnetconduite.repository
 
 import android.content.Context
+import com.florent.carnetconduite.data.SessionPreferences
+import com.florent.carnetconduite.data.Trip
+import com.florent.carnetconduite.data.TripDao
 import kotlinx.coroutines.flow.Flow
 
 class TripRepository(

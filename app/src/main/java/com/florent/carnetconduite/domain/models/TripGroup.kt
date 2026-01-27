@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.domain
+package com.florent.carnetconduite.domain.models
 
 import com.florent.carnetconduite.data.Trip
 
