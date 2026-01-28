@@ -2,9 +2,9 @@ package com.florent.carnetconduite.domain.usecases
 
 import com.florent.carnetconduite.domain.utils.AppLogger
 import com.florent.carnetconduite.domain.utils.Result
+import com.florent.carnetconduite.domain.utils.onError
 import com.florent.carnetconduite.domain.validators.TripValidator
 import com.florent.carnetconduite.repository.TripRepository
-import com.florent.carnetconduite.domain.utils.onError
 
 /**
  * Use Case pour terminer un trajet aller.
@@ -17,13 +17,6 @@ class FinishOutwardUseCase(
 ) {
     /**
      * Termine un trajet aller
-     *
-     * @param tripId ID du trajet à terminer
-     * @param endKm Kilométrage d'arrivée
-     * @param endPlace Lieu d'arrivée
-     * @param allowInconsistentKm Si true, autorise endKm < startKm (après confirmation utilisateur)
-     *
-     * @return Result<Unit> Succès ou erreur
      */
     suspend operator fun invoke(
         tripId: Long,
@@ -33,25 +26,25 @@ class FinishOutwardUseCase(
     ): Result<Unit> = Result.runCatchingSuspend {
         logger.logOperationStart("FinishOutward: trip $tripId, $endKm km")
 
-        // Récupérer le trajet
-        val trip = repository.getTripById(tripId)
+        // Récupérer le trajet - CORRECTION ICI
+        val tripResult = repository.getTripById(tripId)
+        val trip = tripResult.getOrNull()
             ?: throw IllegalArgumentException("Trajet introuvable (ID: $tripId)")
 
         // Validation du lieu
         val placeValidation = validator.validatePlace(endPlace)
         if (placeValidation.isInvalid()) {
-            val errorMsg = placeValidation.getErrorMessage()!!
+            val errorMsg = placeValidation.getErrorMessage() ?: "Lieu invalide"
             logger.logError("Place validation failed: $errorMsg")
             throw IllegalArgumentException(errorMsg)
         }
 
-        // Validation du kilométrage (avec possibilité de bypass)
+        // Validation du kilométrage
         if (!allowInconsistentKm) {
             val kmValidation = validator.validateEndKm(trip.startKm, endKm)
             if (kmValidation.isInvalid()) {
-                val errorMsg = kmValidation.getErrorMessage()!!
+                val errorMsg = kmValidation.getErrorMessage() ?: "Kilométrage invalide"
                 logger.logError("Km validation failed: $errorMsg")
-                // On lance une exception spéciale pour que le ViewModel puisse demander confirmation
                 throw KmInconsistencyException(errorMsg, trip.startKm, endKm)
             }
         } else {
@@ -60,8 +53,7 @@ class FinishOutwardUseCase(
 
         // Terminer le trajet
         val now = System.currentTimeMillis()
-        repository.finishTrip(tripId, endKm, endPlace.trim(), now)
-        repository.clearOngoingSessionId()
+        repository.finishTrip(tripId, endKm, endPlace.trim(), now).getOrThrow()
 
         logger.logOperationEnd("FinishOutward", true)
         logger.log("Trip $tripId finished: ${trip.startKm} -> $endKm km")
@@ -71,7 +63,6 @@ class FinishOutwardUseCase(
 
     /**
      * Exception spéciale pour indiquer une incohérence de kilométrage
-     * Le ViewModel peut capturer cette exception pour demander confirmation
      */
     class KmInconsistencyException(
         message: String,

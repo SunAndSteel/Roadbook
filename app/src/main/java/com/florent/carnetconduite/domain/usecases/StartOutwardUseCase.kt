@@ -52,7 +52,7 @@ class StartOutwardUseCase(
             startKm = startKm,
             startPlace = startPlace.trim(),
             startTime = now,
-            status = TripStatus.ACTIVE.name,
+            status = TripStatus.ACTIVE,
             conditions = conditions.trim(),
             guide = guide,
             date = date,
@@ -65,6 +65,7 @@ class StartOutwardUseCase(
 
         // Insertion en base
         val tripId = repository.insert(trip)
+
         repository.saveOngoingSessionId(tripId)
 
         logger.logOperationEnd("StartOutward", true)

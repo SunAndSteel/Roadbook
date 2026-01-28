@@ -12,9 +12,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.ui.DrivingViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CompletedScreen(viewModel: DrivingViewModel) {
+fun CompletedScreen(viewModel: DrivingViewModel = koinViewModel()) {
     val tripGroups by viewModel.tripGroups.collectAsState()
     val completedCount = tripGroups.count { it.isComplete }
 

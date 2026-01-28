@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.domain.usecase
+package com.florent.carnetconduite.domain.usecases
 
 import com.florent.carnetconduite.domain.utils.AppLogger
 import com.florent.carnetconduite.domain.utils.Result
@@ -8,7 +8,6 @@ import com.florent.carnetconduite.repository.TripRepository
 
 /**
  * Use Case unifié pour toutes les opérations d'édition de trajets.
- * Regroupe les éditions d'heure et de kilométrage.
  */
 class EditTripUseCase(
     private val repository: TripRepository,
@@ -25,10 +24,10 @@ class EditTripUseCase(
             // Validation du timestamp
             val validation = validator.validateTimestamp(newStartTime)
             if (validation.isInvalid()) {
-                throw IllegalArgumentException(validation.getErrorMessage()!!)
+                throw IllegalArgumentException(validation.getErrorMessage() ?: "Timestamp invalide")
             }
 
-            repository.updateStartTime(tripId, newStartTime)
+            repository.updateStartTime(tripId, newStartTime).getOrThrow()
 
             logger.logOperationEnd("EditStartTime", true)
             logger.log("Trip $tripId start time updated")
@@ -46,19 +45,20 @@ class EditTripUseCase(
             // Validation du timestamp
             val validation = validator.validateTimestamp(newEndTime)
             if (validation.isInvalid()) {
-                throw IllegalArgumentException(validation.getErrorMessage()!!)
+                throw IllegalArgumentException(validation.getErrorMessage() ?: "Timestamp invalide")
             }
 
-            // Vérifier que endTime > startTime
-            val trip = repository.getTripById(tripId)
+            // Vérifier que endTime > startTime - CORRECTION ICI
+            val tripResult = repository.getTripById(tripId)
+            val trip = tripResult.getOrNull()
                 ?: throw IllegalArgumentException("Trajet introuvable")
 
             val timeRangeValidation = validator.validateTimeRange(trip.startTime, newEndTime)
             if (timeRangeValidation.isInvalid()) {
-                throw IllegalArgumentException(timeRangeValidation.getErrorMessage()!!)
+                throw IllegalArgumentException(timeRangeValidation.getErrorMessage() ?: "Période invalide")
             }
 
-            repository.updateEndTime(tripId, newEndTime)
+            repository.updateEndTime(tripId, newEndTime).getOrThrow()
 
             logger.logOperationEnd("EditEndTime", true)
             logger.log("Trip $tripId end time updated")
@@ -76,11 +76,12 @@ class EditTripUseCase(
             // Validation du kilométrage
             val validation = validator.validateStartKm(newStartKm)
             if (validation.isInvalid()) {
-                throw IllegalArgumentException(validation.getErrorMessage()!!)
+                throw IllegalArgumentException(validation.getErrorMessage() ?: "Kilométrage invalide")
             }
 
-            // Vérifier que ça reste cohérent avec endKm si présent
-            val trip = repository.getTripById(tripId)
+            // Vérifier cohérence avec endKm - CORRECTION ICI
+            val tripResult = repository.getTripById(tripId)
+            val trip = tripResult.getOrNull()
                 ?: throw IllegalArgumentException("Trajet introuvable")
 
             trip.endKm?.let { endKm ->
@@ -91,7 +92,7 @@ class EditTripUseCase(
                 }
             }
 
-            repository.updateStartKm(tripId, newStartKm)
+            repository.updateStartKm(tripId, newStartKm).getOrThrow()
 
             logger.logOperationEnd("EditStartKm", true)
             logger.log("Trip $tripId start km updated to $newStartKm")
@@ -106,17 +107,18 @@ class EditTripUseCase(
         Result.runCatchingSuspend {
             logger.logOperationStart("EditEndKm: trip $tripId to $newEndKm")
 
-            // Récupérer le trajet
-            val trip = repository.getTripById(tripId)
+            // Récupérer le trajet - CORRECTION ICI
+            val tripResult = repository.getTripById(tripId)
+            val trip = tripResult.getOrNull()
                 ?: throw IllegalArgumentException("Trajet introuvable")
 
             // Validation du kilométrage par rapport au départ
             val validation = validator.validateEndKm(trip.startKm, newEndKm)
             if (validation.isInvalid()) {
-                throw IllegalArgumentException(validation.getErrorMessage()!!)
+                throw IllegalArgumentException(validation.getErrorMessage() ?: "Kilométrage invalide")
             }
 
-            repository.updateEndKm(tripId, newEndKm)
+            repository.updateEndKm(tripId, newEndKm).getOrThrow()
 
             logger.logOperationEnd("EditEndKm", true)
             logger.log("Trip $tripId end km updated to $newEndKm")

@@ -9,7 +9,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -22,14 +24,17 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
+import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.DrivingViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen(viewModel: DrivingViewModel) {
+fun HomeScreen(viewModel: DrivingViewModel = koinViewModel()) {
     val state by viewModel.drivingState.collectAsState()
     val activeTrip by viewModel.activeTrip.collectAsState()
     val arrivedTrip by viewModel.arrivedTrip.collectAsState()
     val tripGroups by viewModel.tripGroups.collectAsState()
+    val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -55,12 +60,11 @@ fun HomeScreen(viewModel: DrivingViewModel) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // En-tête avec indicateur d'état
-                StateIndicatorCard(currentState)
-
                 // Contenu selon l'état
                 when (currentState) {
                     DrivingState.IDLE -> IdleScreen(viewModel = viewModel)
@@ -76,7 +80,7 @@ fun HomeScreen(viewModel: DrivingViewModel) {
                     DrivingState.RETURN_READY -> {
                         // Trouver le trajet retour en statut READY
                         tripGroups.flatMap { listOfNotNull(it.returnTrip) }
-                            .firstOrNull { it.status == "READY" && it.isReturn }?.let { trip ->
+                            .firstOrNull { it.status == TripStatus.READY && it.isReturn }?.let { trip ->
                                 ReturnReadyScreen(trip = trip, viewModel = viewModel)
                             }
                     }

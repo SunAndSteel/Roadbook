@@ -2,8 +2,10 @@ package com.florent.carnetconduite.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -16,9 +18,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.DrivingViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ReturnReadyScreen(trip: Trip, viewModel: DrivingViewModel) {
+fun ReturnReadyScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel()) {
     var editedStartKm by remember { mutableStateOf(trip.startKm.toString()) }
 
     ElevatedCard(

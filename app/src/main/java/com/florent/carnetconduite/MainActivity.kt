@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -29,6 +28,7 @@ import com.florent.carnetconduite.ui.theme.ThemeMode
 import com.florent.carnetconduite.ui.theme.ThemePreferences
 import com.florent.carnetconduite.ui.theme.themeIcon
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 // Destinations de navigation
 sealed class Screen(val route: String, val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrivingLogApp(
-    viewModel: DrivingViewModel = viewModel(),
+    viewModel: DrivingViewModel = koinViewModel(),
     themeMode: ThemeMode,
     onChangeTheme: () -> Unit
 ) {

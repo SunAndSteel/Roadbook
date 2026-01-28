@@ -1,8 +1,13 @@
 package com.florent.carnetconduite.data
 
 import androidx.room.*
+import com.florent.carnetconduite.domain.models.TripStatus
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * DAO pour les opérations sur les trajets.
+ * Migré pour utiliser TripStatus enum.
+ */
 @Dao
 interface TripDao {
     @Query("SELECT * FROM trips ORDER BY startTime DESC")
@@ -14,6 +19,9 @@ interface TripDao {
     @Query("SELECT * FROM trips WHERE endKm IS NULL ORDER BY startTime DESC LIMIT 1")
     fun getActiveTrip(): Flow<Trip?>
 
+    /**
+     * Récupère le trajet retour prêt (utilise TripStatus enum)
+     */
     @Query("SELECT * FROM trips WHERE status = 'READY' AND isReturn = 1 ORDER BY id DESC LIMIT 1")
     suspend fun getReadyReturnTrip(): Trip?
 
@@ -29,12 +37,21 @@ interface TripDao {
     @Query("DELETE FROM trips")
     suspend fun deleteAllTrips()
 
+    /**
+     * Termine un trajet (utilise TripStatus.COMPLETED)
+     */
     @Query("UPDATE trips SET endKm = :endKm, endPlace = :endPlace, endTime = :endTime, status = 'COMPLETED' WHERE id = :tripId")
     suspend fun finishTrip(tripId: Long, endKm: Int, endPlace: String, endTime: Long)
 
+    /**
+     * Démarre un trajet (utilise TripStatus.ACTIVE)
+     */
     @Query("UPDATE trips SET startTime = :startTime, startKm = :startKm, status = 'ACTIVE' WHERE id = :tripId")
     suspend fun startTrip(tripId: Long, startTime: Long, startKm: Int)
 
+    /**
+     * Annule un trajet (utilise TripStatus.CANCELLED)
+     */
     @Query("UPDATE trips SET status = 'CANCELLED' WHERE id = :tripId")
     suspend fun cancelTrip(tripId: Long)
 
@@ -50,7 +67,9 @@ interface TripDao {
     @Query("UPDATE trips SET startTime = :newStartTime WHERE id = :tripId")
     suspend fun updateStartTime(tripId: Long, newStartTime: Long)
 
-    // Transaction : finir l'aller et préparer le retour
+    /**
+     * Transaction : finir l'aller et préparer le retour
+     */
     @Transaction
     suspend fun finishAndPrepareReturn(
         tripId: Long,
@@ -60,18 +79,19 @@ interface TripDao {
     ): Long {
         val trip = getTripById(tripId) ?: throw IllegalStateException("Trip not found")
 
-        // Finir l'aller
+        // Finir le trajet aller
         finishTrip(tripId, endKm, endPlace, endTime)
 
-        // Créer le retour en mode READY
+        // Créer le trajet retour en statut READY
         val returnTrip = Trip(
             startKm = endKm,
-            startPlace = endPlace,
-            endPlace = trip.startPlace, // Pré-remplir avec le départ de l'aller
-            startTime = 0L, // Pas encore démarré
+            startPlace = trip.endPlace ?: "",
+            endPlace = trip.startPlace,
+            startTime = 0L,
             isReturn = true,
             pairedTripId = tripId,
-            status = "READY",
+            status = TripStatus.READY,
+            conditions = trip.conditions,
             guide = trip.guide,
             date = trip.date
         )
@@ -79,20 +99,23 @@ interface TripDao {
         return insertTrip(returnTrip)
     }
 
-    // Transaction : créer un retour "skipped" pour trajet simple
+    /**
+     * Crée un trajet retour SKIPPED (trajet simple, pas de retour)
+     */
     @Transaction
-    suspend fun createSkippedReturn(tripId: Long): Long {
-        val trip = getTripById(tripId) ?: throw IllegalStateException("Trip not found")
+    suspend fun createSkippedReturn(outwardTripId: Long): Long {
+        val trip = getTripById(outwardTripId) ?: throw IllegalStateException("Trip not found")
 
         val skippedReturn = Trip(
             startKm = trip.endKm ?: trip.startKm,
             startPlace = trip.endPlace ?: "",
             endPlace = trip.startPlace,
-            startTime = trip.endTime ?: System.currentTimeMillis(),
-            endTime = trip.endTime ?: System.currentTimeMillis(),
+            startTime = 0L,
+            endTime = 0L,
             isReturn = true,
-            pairedTripId = tripId,
-            status = "SKIPPED",
+            pairedTripId = outwardTripId,
+            status = TripStatus.SKIPPED,
+            conditions = trip.conditions,
             guide = trip.guide,
             date = trip.date
         )
@@ -100,10 +123,18 @@ interface TripDao {
         return insertTrip(skippedReturn)
     }
 
+    /**
+     * Démarre un trajet retour préparé
+     */
     @Transaction
-    suspend fun startReturnTrip(returnTripId: Long, actualStartKm: Int?, startTime: Long) {
+    suspend fun startReturn(returnTripId: Long, actualStartKm: Int?, startTime: Long) {
         val trip = getTripById(returnTripId) ?: throw IllegalStateException("Return trip not found")
-        val newStartKm = actualStartKm ?: trip.startKm
-        startTrip(returnTripId, startTime, newStartKm)
+
+        if (actualStartKm != null && actualStartKm != trip.startKm) {
+            // Mettre à jour le km de départ si différent
+            startTrip(returnTripId, startTime, actualStartKm)
+        } else {
+            startTrip(returnTripId, startTime, trip.startKm)
+        }
     }
 }

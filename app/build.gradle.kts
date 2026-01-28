@@ -12,11 +12,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.carnetconduite"
+    namespace = "com.florent.carnetconduite"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.carnetconduite"
+        applicationId = "com.florent.carnetconduite"
         minSdk = 31
         targetSdk = 36
         versionCode = 1
@@ -81,6 +81,10 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+
+    // Koin DI
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
 
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

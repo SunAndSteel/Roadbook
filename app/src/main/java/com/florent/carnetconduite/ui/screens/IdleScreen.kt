@@ -15,10 +15,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.ui.DrivingViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IdleScreen(viewModel: DrivingViewModel) {
+fun IdleScreen(viewModel: DrivingViewModel = koinViewModel()) {
     var startKm by remember { mutableStateOf("") }
     var startPlace by remember { mutableStateOf("") }
     var conditions by remember { mutableStateOf("") }
@@ -35,7 +36,9 @@ fun IdleScreen(viewModel: DrivingViewModel) {
         ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 4.dp
-        )
+        ),
+
+
     ) {
         Column(
             modifier = Modifier.padding(24.dp),

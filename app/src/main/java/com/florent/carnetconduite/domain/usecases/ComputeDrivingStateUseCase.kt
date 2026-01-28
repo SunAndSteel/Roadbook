@@ -2,6 +2,7 @@ package com.florent.carnetconduite.domain.usecases
 
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
+import com.florent.carnetconduite.domain.models.TripStatus
 
 /**
  * Use Case responsable du calcul de l'état de conduite
@@ -26,7 +27,7 @@ class ComputeDrivingStateUseCase {
         }
 
         // Priorité 3 : Retour prêt
-        if (trips.any { it.isReturn && it.status == "READY" }) {
+        if (trips.any { it.isReturn && it.status == TripStatus.READY }) {
             return DrivingState.RETURN_READY
         }
 
@@ -38,7 +39,9 @@ class ComputeDrivingStateUseCase {
 
         // Priorité 5 : IDLE ou COMPLETED
         return if (trips.isEmpty() || trips.all {
-                it.status == "COMPLETED" || it.status == "CANCELLED" || it.status == "SKIPPED"
+                it.status == TripStatus.COMPLETED ||
+                        it.status == TripStatus.CANCELLED ||
+                        it.status == TripStatus.SKIPPED
             }) {
             DrivingState.IDLE
         } else {
@@ -52,7 +55,7 @@ class ComputeDrivingStateUseCase {
     private fun findArrivedTrip(trips: List<Trip>): Trip? {
         // Trouver le dernier trajet aller terminé qui n'a pas de retour associé
         val latestOutward = trips
-            .filter { !it.isReturn && it.status == "COMPLETED" }
+            .filter { !it.isReturn && it.status == TripStatus.COMPLETED }
             .maxByOrNull { it.id }
 
         if (latestOutward != null) {

@@ -4,10 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+/**
+ * Base de données Room de l'application.
+ * Version 2: Ajout des TypeConverters pour TripStatus enum.
+ */
 @Database(entities = [Trip::class], version = 2, exportSchema = false)
+@TypeConverters(Converters::class)  // ← NOUVEAU: TypeConverters pour TripStatus
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
 
@@ -36,31 +42,31 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                 """.trimIndent())
 
-                // Migrer les données existantes
+                // Migrer les données existantes si la table trips existe
                 database.execSQL("""
-                    INSERT INTO trips_new (
-                        startKm, endKm, startPlace, endPlace, startTime, endTime,
-                        isReturn, status, conditions, guide, date
+                    INSERT OR IGNORE INTO trips_new (
+                        id, startKm, endKm, startPlace, endPlace, startTime, endTime,
+                        isReturn, pairedTripId, status, conditions, guide, date
                     )
                     SELECT 
-                        CAST(kmDepart AS INTEGER),
-                        CASE WHEN kmFin > 0 THEN CAST(kmFin AS INTEGER) ELSE NULL END,
-                        depart,
-                        arrivee,
-                        timestamp,
-                        CASE WHEN heureFin != '' THEN timestamp ELSE NULL END,
-                        CASE WHEN typeTrajet = 'R' THEN 1 ELSE 0 END,
-                        CASE WHEN status = 'completed' THEN 'COMPLETED' ELSE 'ACTIVE' END,
+                        id,
+                        startKm,
+                        endKm,
+                        startPlace,
+                        endPlace,
+                        startTime,
+                        endTime,
+                        isReturn,
+                        pairedTripId,
+                        status,
                         conditions,
                         guide,
                         date
-                    FROM trips
+                    FROM trips WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='trips')
                 """.trimIndent())
 
-                // Supprimer ancienne table
-                database.execSQL("DROP TABLE trips")
-
-                // Renommer nouvelle table
+                // Supprimer ancienne table et renommer
+                database.execSQL("DROP TABLE IF EXISTS trips")
                 database.execSQL("ALTER TABLE trips_new RENAME TO trips")
             }
         }
@@ -70,10 +76,12 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "driving_log_database"
+                    "roadbook_database"
                 )
                     .addMigrations(MIGRATION_1_2)
+                    .fallbackToDestructiveMigration() // Pour développement
                     .build()
+
                 INSTANCE = instance
                 instance
             }

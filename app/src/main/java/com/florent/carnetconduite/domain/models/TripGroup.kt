@@ -1,6 +1,7 @@
 package com.florent.carnetconduite.domain.models
 
 import com.florent.carnetconduite.data.Trip
+import com.florent.carnetconduite.domain.models.TripStatus
 
 /**
  * Domain model qui groupe un trajet aller et son retour éventuel
@@ -12,10 +13,10 @@ data class TripGroup(
 ) {
     val totalKms: Int = outward.kmsComptabilises + (returnTrip?.kmsComptabilises ?: 0)
 
-    val hasReturn: Boolean = returnTrip != null && returnTrip.status != "SKIPPED"
+    val hasReturn: Boolean = returnTrip != null && returnTrip.status != TripStatus.SKIPPED
 
-    val isComplete: Boolean = outward.status == "COMPLETED" &&
-            (returnTrip == null || returnTrip.status == "COMPLETED" || returnTrip.status == "SKIPPED")
+    val isComplete: Boolean = outward.status == TripStatus.COMPLETED &&
+            (returnTrip == null || returnTrip.status == TripStatus.COMPLETED || returnTrip.status == TripStatus.SKIPPED)
 }
 
 /**
@@ -24,7 +25,7 @@ data class TripGroup(
 fun groupTrips(trips: List<Trip>): List<TripGroup> {
     // Filtrer seulement les trajets terminés ou skipped
     val completedTrips = trips.filter {
-        it.status == "COMPLETED" || it.status == "SKIPPED"
+        it.status == TripStatus.COMPLETED || it.status == TripStatus.SKIPPED
     }
 
     // Trier par date de début

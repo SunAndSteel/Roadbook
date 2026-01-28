@@ -2,8 +2,10 @@ package com.florent.carnetconduite.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -17,13 +19,14 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.dialogs.TimePickerDialog
+import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun ReturnActiveScreen(trip: Trip, viewModel: DrivingViewModel) {
+fun ReturnActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel()) {
     var endKm by remember { mutableStateOf("") }
     var showEditStartTime by remember { mutableStateOf(false) }
 

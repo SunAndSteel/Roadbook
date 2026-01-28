@@ -2,7 +2,9 @@ package com.florent.carnetconduite.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -21,10 +23,14 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+import org.koin.androidx.compose.koinViewModel
+
+
 @Composable
-fun ArrivedScreen(trip: Trip, viewModel: DrivingViewModel) {
+fun ArrivedScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel()) {
     var showEditEndTime by remember { mutableStateOf(false) }
     var showEditEndKm by remember { mutableStateOf(false) }
+
 
     ElevatedCard(
         modifier = Modifier
@@ -39,7 +45,8 @@ fun ArrivedScreen(trip: Trip, viewModel: DrivingViewModel) {
         )
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier
+                .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // En-tête succès

@@ -22,14 +22,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.TripGroup
+import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.components.StatsHeader
 import com.florent.carnetconduite.ui.components.TripGroupCard
 import com.florent.carnetconduite.ui.dialogs.EditTripGroupDialog
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(viewModel: DrivingViewModel) {
+fun HistoryScreen(viewModel: DrivingViewModel = koinViewModel()) {
     val tripGroups by viewModel.tripGroups.collectAsState()
     val trips by viewModel.trips.collectAsState()
     var showEmptyState by remember { mutableStateOf(false) }
@@ -37,11 +39,11 @@ fun HistoryScreen(viewModel: DrivingViewModel) {
 
     // Calculer les statistiques localement
     val totalDistance = remember(trips) {
-        trips.filter { it.status == "COMPLETED" }.sumOf { it.kmsComptabilises }
+        trips.filter { it.status == TripStatus.COMPLETED }.sumOf { it.kmsComptabilises }
     }
 
     val totalDuration = remember(trips) {
-        trips.filter { it.status == "COMPLETED" && it.endTime != null }
+        trips.filter { it.status == TripStatus.COMPLETED && it.endTime != null }
             .sumOf { (it.endTime!! - it.startTime) }
     }
 
