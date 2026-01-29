@@ -110,8 +110,6 @@ If unsure, choose the smallest safe change.
 
 ---
 
-## Error Handling
-
 ## Error Handling (PRODUCTION-GRADE)
 
 ### Core principle
