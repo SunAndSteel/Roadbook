@@ -39,7 +39,8 @@ fun HomeScreen(
     }
 
     // Récupérer les trajets pour les passer aux écrans
-    val trips by viewModel.repository.getAllTrips().collectAsState(initial = emptyList())
+    val trips by viewModel.trips.collectAsState()
+
 
     // Trouver le trajet actif selon l'état
     val currentTrip = when (drivingState) {

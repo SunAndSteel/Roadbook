@@ -23,8 +23,9 @@ class HistoryViewModel(
     /**
      * Flow des groupes de trajets (aller + retour)
      */
-    val tripGroups: Flow<List<TripGroup>> = repository.getAllTrips()
+    val tripGroups: Flow<List<TripGroup>> = repository.allTrips
         .map { trips -> groupTrips(trips) }
+
 
     /**
      * Statistiques calculées

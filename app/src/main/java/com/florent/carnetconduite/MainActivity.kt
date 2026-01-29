@@ -352,7 +352,6 @@ fun RoadbookApp(
          */
         NavGraph(
             navController = navController,
-            drivingViewModel = viewModel,
             modifier = Modifier.padding(padding)
         )
     }

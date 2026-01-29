@@ -9,6 +9,12 @@ import com.florent.carnetconduite.repository.TripRepository
 import com.florent.carnetconduite.ui.UiEvent
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import com.florent.carnetconduite.data.Trip
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
+
 
 /**
  * ViewModel pour l'écran Home - gère l'état actuel de conduite
@@ -32,11 +38,18 @@ class HomeViewModel(
         computeDrivingState()
     }
 
+    val trips: StateFlow<List<Trip>> =
+        repository.allTrips.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
     private fun computeDrivingState() {
         viewModelScope.launch {
-            val trips = repository.getAllTrips()
-            // Calculer l'état
-            val state = computeDrivingStateUseCase(trips)
+            // IMPORTANT: repository.allTrips est un Flow<List<Trip>>
+            val tripsList = repository.allTrips.first()
+            val state = computeDrivingStateUseCase(tripsList)
             _drivingState.value = state
         }
     }
