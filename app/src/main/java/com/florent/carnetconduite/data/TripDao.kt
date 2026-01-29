@@ -68,6 +68,13 @@ interface TripDao {
     suspend fun updateStartTime(tripId: Long, newStartTime: Long)
 
     /**
+     * Marque un trajet aller comme "simple" sans créer de retour.
+     * On réutilise pairedTripId pour indiquer une décision explicite.
+     */
+    @Query("UPDATE trips SET pairedTripId = :tripId WHERE id = :tripId AND isReturn = 0")
+    suspend fun markOutwardAsSimple(tripId: Long)
+
+    /**
      * Transaction : finir l'aller et préparer le retour
      */
     @Transaction

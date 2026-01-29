@@ -86,6 +86,9 @@ class HomeViewModel(
             .maxByOrNull { it.id }
 
         if (latestOutward != null) {
+            if (latestOutward.pairedTripId == latestOutward.id) {
+                return null
+            }
             val hasReturn = tripList.any {
                 it.pairedTripId == latestOutward.id && it.isReturn
             }
@@ -189,6 +192,14 @@ class HomeViewModel(
                 is Result.Loading -> {}
             }
         }
+    }
+
+    fun confirmSimpleTrip(tripId: Long) {
+        decideTripType(tripId, prepareReturn = false)
+    }
+
+    fun prepareReturnTrip(tripId: Long) {
+        decideTripType(tripId, prepareReturn = true)
     }
 
     fun finishReturn(tripId: Long, endKm: Int) {

@@ -109,6 +109,9 @@ class DrivingViewModel(
             .maxByOrNull { it.id }
 
         if (latestOutward != null) {
+            if (latestOutward.pairedTripId == latestOutward.id) {
+                return null
+            }
             val hasReturn = tripList.any {
                 it.pairedTripId == latestOutward.id && it.isReturn
             }
@@ -220,6 +223,14 @@ class DrivingViewModel(
                 is Result.Loading -> {}
             }
         }
+    }
+
+    fun confirmSimpleTrip(tripId: Long) {
+        decideTripType(tripId, prepareReturn = false)
+    }
+
+    fun prepareReturnTrip(tripId: Long) {
+        decideTripType(tripId, prepareReturn = true)
     }
 
     /**
