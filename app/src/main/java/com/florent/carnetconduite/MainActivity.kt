@@ -214,10 +214,19 @@ fun RoadbookApp(
         Screen.History
     )
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val currentTitle = when (currentRoute) {
+        Screen.Home.route -> Screen.Home.title
+        Screen.History.route -> Screen.History.title
+        Screen.Settings.route -> Screen.Settings.title
+        else -> "Roadbook"
+    }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Roadbook") },
+            SmallTopAppBar(
+                title = { Text(currentTitle) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -243,15 +252,17 @@ fun RoadbookApp(
                      *
                      * Personnalisable si besoin avec enterTransition/exitTransition.
                      */
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.Settings.route)
+                    if (currentRoute != Screen.Settings.route) {
+                        IconButton(
+                            onClick = {
+                                navController.navigate(Screen.Settings.route)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Paramètres"
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Paramètres"
-                        )
                     }
                 }
             )
@@ -270,7 +281,6 @@ fun RoadbookApp(
                  * currentBackStackEntryAsState() = observe le changement de destination
                  * Quand on navigue, ce State change → recomposition → item sélectionné se met à jour
                  */
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
                 navigationItems.forEach { screen ->
