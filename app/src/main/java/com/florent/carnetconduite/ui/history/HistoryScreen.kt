@@ -46,6 +46,54 @@ fun HistoryScreen(
         }
     }
 
+    HistoryScreenContent(
+        modifier = modifier,
+        tripGroups = tripGroups,
+        tripStats = tripStats,
+        snackbarHostState = snackbarHostState,
+        onEdit = { selectedGroupForEdit = it },
+        onDelete = { viewModel.deleteTripGroup(it) }
+    )
+
+    // Dialogue d'édition
+    selectedGroupForEdit?.let { group ->
+        EditTripGroupDialog(
+            group = group,
+            onDismiss = {
+                selectedGroupForEdit = null
+            },
+            onEditStartTime = { trip, newTime ->
+                viewModel.editStartTime(trip.id, newTime)
+            },
+            onEditEndTime = { trip, newTime ->
+                viewModel.editEndTime(trip.id, newTime)
+            },
+            onEditStartKm = { trip, newKm ->
+                viewModel.editStartKm(trip.id, newKm)
+            },
+            onEditEndKm = { trip, newKm ->
+                viewModel.editEndKm(trip.id, newKm)
+            },
+            onEditDate = { trip, newDate ->
+                viewModel.editDate(trip.id, newDate)
+            },
+            onEditConditions = { trip, newConditions ->
+                viewModel.editConditions(trip.id, newConditions)
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HistoryScreenContent(
+    modifier: Modifier = Modifier,
+    tripGroups: List<TripGroup>,
+    tripStats: TripStats,
+    snackbarHostState: SnackbarHostState,
+    onEdit: (TripGroup) -> Unit,
+    onDelete: (TripGroup) -> Unit
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -90,44 +138,12 @@ fun HistoryScreen(
                     items(tripGroups) { group ->
                         TripGroupCard(
                             tripGroup = group,
-                            onEdit = {
-                                selectedGroupForEdit = group
-                            },
-                            onDelete = {
-                                viewModel.deleteTripGroup(group)
-                            }
+                            onEdit = { onEdit(group) },
+                            onDelete = { onDelete(group) }
                         )
                     }
                 }
             }
         }
-    }
-
-    // Dialogue d'édition
-    selectedGroupForEdit?.let { group ->
-        EditTripGroupDialog(
-            group = group,
-            onDismiss = {
-                selectedGroupForEdit = null
-            },
-            onEditStartTime = { trip, newTime ->
-                viewModel.editStartTime(trip.id, newTime)
-            },
-            onEditEndTime = { trip, newTime ->
-                viewModel.editEndTime(trip.id, newTime)
-            },
-            onEditStartKm = { trip, newKm ->
-                viewModel.editStartKm(trip.id, newKm)
-            },
-            onEditEndKm = { trip, newKm ->
-                viewModel.editEndKm(trip.id, newKm)
-            },
-            onEditDate = { trip, newDate ->
-                viewModel.editDate(trip.id, newDate)
-            },
-            onEditConditions = { trip, newConditions ->
-                viewModel.editConditions(trip.id, newConditions)
-            }
-        )
     }
 }
