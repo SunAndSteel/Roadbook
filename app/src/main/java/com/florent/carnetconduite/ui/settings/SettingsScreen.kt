@@ -14,8 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.UserSettings
-import com.florent.carnetconduite.ui.preview.DevicePreview
-import com.florent.carnetconduite.ui.preview.RoadbookTheme
 import com.florent.carnetconduite.ui.theme.ThemeMode
 
 /**
@@ -248,7 +246,7 @@ fun SettingsScreen(
  * - Facile de changer le design de tous les items
  */
 @Composable
-private fun SettingsItem(
+internal fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
@@ -297,7 +295,7 @@ private fun SettingsItem(
  * Composable pour un item de setting avec Switch.
  */
 @Composable
-private fun SettingsSwitchItem(
+internal fun SettingsSwitchItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
@@ -343,7 +341,7 @@ private fun SettingsSwitchItem(
  * Header de section dans les settings.
  */
 @Composable
-private fun SettingsSectionHeader(
+internal fun SettingsSectionHeader(
     text: String,
     modifier: Modifier = Modifier
 ) {
@@ -362,7 +360,7 @@ private fun SettingsSectionHeader(
  * Chaque option est cliquable entièrement (pas juste le bouton radio).
  */
 @Composable
-private fun ThemeSelectionDialog(
+internal fun ThemeSelectionDialog(
     currentTheme: ThemeMode,
     onThemeSelected: (ThemeMode) -> Unit,
     onDismiss: () -> Unit
@@ -420,7 +418,7 @@ private fun ThemeSelectionDialog(
  * Dialogue de sélection du guide par défaut.
  */
 @Composable
-private fun GuideSelectionDialog(
+internal fun GuideSelectionDialog(
     currentGuide: String,
     onGuideSelected: (String) -> Unit,
     onDismiss: () -> Unit
@@ -459,106 +457,6 @@ private fun GuideSelectionDialog(
     }
 }
 
-@DevicePreview
-@Composable
-private fun SettingsScreenPreview() {
-    RoadbookTheme {
-        SettingsScreen(
-            settings = UserSettings(
-                themeMode = ThemeMode.DARK,
-                defaultGuide = "2",
-                showDeleteConfirmations = true
-            ),
-            onThemeModeChange = {},
-            onDefaultGuideChange = {},
-            onShowDeleteConfirmationsChange = {},
-            onResetToDefaults = {},
-            onNavigateBack = {}
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun SettingsItemPreview() {
-    RoadbookTheme {
-        SettingsItem(
-            icon = Icons.Default.Palette,
-            title = "Thème",
-            subtitle = "Sombre",
-            onClick = {}
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun SettingsSwitchItemPreview() {
-    RoadbookTheme {
-        SettingsSwitchItem(
-            icon = Icons.Default.Delete,
-            title = "Confirmer les suppressions",
-            subtitle = "Demander confirmation avant de supprimer un trajet",
-            checked = true,
-            onCheckedChange = {}
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun SettingsSectionHeaderPreview() {
-    RoadbookTheme {
-        SettingsSectionHeader("Apparence")
-    }
-}
-
-@DevicePreview
-@Composable
-private fun ThemeSelectionDialogPreview() {
-    RoadbookTheme {
-        ThemeSelectionDialog(
-            currentTheme = ThemeMode.DARK,
-            onThemeSelected = {},
-            onDismiss = {}
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun GuideSelectionDialogPreview() {
-    RoadbookTheme {
-        GuideSelectionDialog(
-            currentGuide = "2",
-            onGuideSelected = {},
-            onDismiss = {}
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun ResetSettingsDialogPreview() {
-    RoadbookTheme {
-        AlertDialog(
-            onDismissRequest = {},
-            icon = { Icon(Icons.Default.Warning, null) },
-            title = { Text("Réinitialiser les paramètres ?") },
-            text = { Text("Tous vos paramètres seront restaurés à leurs valeurs par défaut.") },
-            confirmButton = {
-                TextButton(onClick = {}) {
-                    Text("Réinitialiser")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {}) {
-                    Text("Annuler")
-                }
-            }
-        )
-    }
-}
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {

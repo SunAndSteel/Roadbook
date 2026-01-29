@@ -72,7 +72,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
-import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenContent
@@ -96,8 +95,6 @@ import com.florent.carnetconduite.ui.home.screens.rememberIdleScreenState
 import com.florent.carnetconduite.ui.home.screens.rememberOutwardActiveScreenState
 import com.florent.carnetconduite.ui.home.screens.rememberReturnActiveScreenState
 import com.florent.carnetconduite.ui.home.screens.rememberReturnReadyScreenState
-import com.florent.carnetconduite.ui.preview.DevicePreview
-import com.florent.carnetconduite.ui.preview.RoadbookTheme
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.koinViewModel
 import com.florent.carnetconduite.util.formatTimeRange
@@ -282,21 +279,21 @@ fun HomeScreen(
     }
 }
 
-private data class TripHeaderData(
+internal data class TripHeaderData(
     val icon: ImageVector,
     val title: String,
     val subtitle: String,
     val statusLabel: String
 )
 
-private data class StepColors(
+internal data class StepColors(
     val headerContainer: Color,
     val onHeaderContainer: Color,
     val statusColor: Color,
     val cardContainer: Color
 )
 
-private fun headerForState(state: DrivingState): TripHeaderData {
+internal fun headerForState(state: DrivingState): TripHeaderData {
     return when (state) {
         DrivingState.IDLE -> TripHeaderData(
             icon = Icons.Rounded.DirectionsCar,
@@ -338,7 +335,7 @@ private fun headerForState(state: DrivingState): TripHeaderData {
 }
 
 @Composable
-private fun TripHeader(
+internal fun TripHeader(
     header: TripHeaderData,
     statusColor: Color,
     containerColor: Color,
@@ -428,7 +425,7 @@ private fun TripHeader(
 }
 
 @Composable
-private fun TripSummary(
+internal fun TripSummary(
     trip: Trip?,
     stateLabel: String,
     accentColor: Color,
@@ -630,7 +627,7 @@ private fun PulsingDot(
 }
 
 @Composable
-private fun PrimaryActionArea(content: @Composable () -> Unit) {
+internal fun PrimaryActionArea(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -642,7 +639,7 @@ private fun PrimaryActionArea(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun colorsForState(state: DrivingState): StepColors {
+internal fun colorsForState(state: DrivingState): StepColors {
     val scheme = MaterialTheme.colorScheme
     return when (state) {
         DrivingState.IDLE -> StepColors(
@@ -684,7 +681,7 @@ private fun colorsForState(state: DrivingState): StepColors {
     }
 }
 
-private fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
+internal fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
     return when (state) {
         DrivingState.OUTWARD_ACTIVE -> trips.find {
             it.endKm == null && !it.isReturn && it.status == TripStatus.ACTIVE
@@ -703,282 +700,4 @@ private fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
 
 private fun formatTripTime(trip: Trip): String {
     return formatTimeRange(trip.startTime, trip.endTime, ongoingLabel = "En cours")
-}
-
-private const val PreviewStartTime = 1704445200000L
-private const val PreviewEndTime = PreviewStartTime + 45 * 60 * 1000L
-
-private val previewOutwardActiveTrip = Trip(
-    id = 1L,
-    startKm = 12500,
-    startPlace = "Bordeaux - Centre",
-    startTime = PreviewStartTime,
-    isReturn = false,
-    status = TripStatus.ACTIVE,
-    conditions = "Soleil",
-    guide = "1",
-    date = "2024-01-05"
-)
-
-private val previewArrivedTrip = Trip(
-    id = 2L,
-    startKm = 12500,
-    endKm = 12620,
-    startPlace = "Bordeaux - Centre",
-    endPlace = "Pessac",
-    startTime = PreviewStartTime,
-    endTime = PreviewEndTime,
-    isReturn = false,
-    pairedTripId = 2L,
-    status = TripStatus.COMPLETED,
-    conditions = "Soleil",
-    guide = "1",
-    date = "2024-01-05"
-)
-
-private val previewReturnReadyTrip = Trip(
-    id = 3L,
-    startKm = 12620,
-    startPlace = "Pessac",
-    startTime = PreviewEndTime + 10 * 60 * 1000L,
-    isReturn = true,
-    pairedTripId = 2L,
-    status = TripStatus.READY,
-    conditions = "Soleil",
-    guide = "1",
-    date = "2024-01-05"
-)
-
-private val previewReturnActiveTrip = Trip(
-    id = 4L,
-    startKm = 12620,
-    startPlace = "Pessac",
-    startTime = PreviewEndTime + 10 * 60 * 1000L,
-    isReturn = true,
-    pairedTripId = 2L,
-    status = TripStatus.ACTIVE,
-    conditions = "Soleil",
-    guide = "1",
-    date = "2024-01-05"
-)
-
-private val previewTripGroups = listOf(
-    TripGroup(
-        outward = previewArrivedTrip,
-        returnTrip = previewReturnActiveTrip.copy(
-            id = 5L,
-            endKm = 12810,
-            endPlace = "Bordeaux - Centre",
-            endTime = PreviewEndTime + 70 * 60 * 1000L,
-            status = TripStatus.COMPLETED
-        ),
-        seanceNumber = 12
-    )
-)
-
-@Composable
-private fun HomeScreenPreviewLayout(
-    drivingState: DrivingState,
-    trips: List<Trip>,
-    tripGroups: List<TripGroup>
-) {
-    val scrollState = rememberScrollState()
-    val idleState = rememberIdleScreenState().apply {
-        startKm = "12500"
-        startPlace = "Bordeaux - Centre"
-        conditions = "Ensoleillé"
-        guide = "2"
-        advancedExpanded = true
-        guideExpanded = false
-    }
-    val outwardState = rememberOutwardActiveScreenState().apply {
-        endKm = "12620"
-        endPlace = "Pessac"
-    }
-    val arrivedState = rememberArrivedScreenState()
-    val returnReadyState = rememberReturnReadyScreenState().apply {
-        editedStartKm = "12620"
-    }
-    val returnActiveState = rememberReturnActiveScreenState().apply {
-        endKm = "12810"
-    }
-
-    Scaffold { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            val currentTrip = findTripForState(drivingState, trips)
-            val header = headerForState(drivingState)
-            val colors = colorsForState(drivingState)
-
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                TripHeader(
-                    header = header,
-                    statusColor = colors.statusColor,
-                    containerColor = colors.headerContainer,
-                    onContainerColor = colors.onHeaderContainer,
-                    showActiveIndicator = drivingState == DrivingState.OUTWARD_ACTIVE || drivingState == DrivingState.RETURN_ACTIVE
-                )
-                TripSummary(
-                    trip = currentTrip,
-                    stateLabel = header.subtitle,
-                    accentColor = colors.statusColor,
-                    showIdleSetup = drivingState == DrivingState.IDLE,
-                    idleState = idleState
-                )
-
-                ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = colors.cardContainer
-                    ),
-                    elevation = CardDefaults.elevatedCardElevation(
-                        defaultElevation = 6.dp
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        when (drivingState) {
-                            DrivingState.IDLE -> IdleScreenContent(state = idleState)
-                            DrivingState.OUTWARD_ACTIVE -> currentTrip?.let {
-                                OutwardActiveScreenContent(trip = it, state = outwardState)
-                            }
-                            DrivingState.ARRIVED -> currentTrip?.let {
-                                ArrivedScreenContent(trip = it, state = arrivedState)
-                            }
-                            DrivingState.RETURN_READY -> currentTrip?.let {
-                                ReturnReadyScreenContent(trip = it, state = returnReadyState)
-                            }
-                            DrivingState.RETURN_ACTIVE -> currentTrip?.let {
-                                ReturnActiveScreenContent(trip = it, state = returnActiveState)
-                            }
-                            DrivingState.COMPLETED -> CompletedScreenContent(tripGroups = tripGroups)
-                        }
-                    }
-                }
-
-                PrimaryActionArea {
-                    when (drivingState) {
-                        DrivingState.IDLE -> IdleScreenPrimaryAction(
-                            state = idleState,
-                            onStartOutward = { _, _, _, _ -> }
-                        )
-                        DrivingState.OUTWARD_ACTIVE -> currentTrip?.let {
-                            OutwardActiveScreenPrimaryAction(
-                                trip = it,
-                                state = outwardState,
-                                onFinishOutward = { _, _, _ -> }
-                            )
-                        }
-                        DrivingState.ARRIVED -> currentTrip?.let {
-                            ArrivedScreenPrimaryAction(
-                                trip = it,
-                                onPrepareReturn = {},
-                                onConfirmSimpleTrip = {}
-                            )
-                        }
-                        DrivingState.RETURN_READY -> currentTrip?.let {
-                            ReturnReadyScreenPrimaryAction(
-                                trip = it,
-                                state = returnReadyState,
-                                onStartReturn = { _, _ -> },
-                                onCancelReturn = {}
-                            )
-                        }
-                        DrivingState.RETURN_ACTIVE -> currentTrip?.let {
-                            ReturnActiveScreenPrimaryAction(
-                                trip = it,
-                                state = returnActiveState,
-                                onFinishReturn = { _, _ -> }
-                            )
-                        }
-                        DrivingState.COMPLETED -> CompletedScreenPrimaryAction()
-                    }
-                }
-            }
-        }
-    }
-}
-
-@DevicePreview
-@Composable
-private fun HomeScreenFullIdlePreview() {
-    RoadbookTheme {
-        HomeScreenPreviewLayout(
-            drivingState = DrivingState.IDLE,
-            trips = emptyList(),
-            tripGroups = previewTripGroups
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun HomeScreenFullOutwardActivePreview() {
-    RoadbookTheme {
-        HomeScreenPreviewLayout(
-            drivingState = DrivingState.OUTWARD_ACTIVE,
-            trips = listOf(previewOutwardActiveTrip),
-            tripGroups = previewTripGroups
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun HomeScreenFullArrivedPreview() {
-    RoadbookTheme {
-        HomeScreenPreviewLayout(
-            drivingState = DrivingState.ARRIVED,
-            trips = listOf(previewArrivedTrip),
-            tripGroups = previewTripGroups
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun HomeScreenFullReturnReadyPreview() {
-    RoadbookTheme {
-        HomeScreenPreviewLayout(
-            drivingState = DrivingState.RETURN_READY,
-            trips = listOf(previewReturnReadyTrip),
-            tripGroups = previewTripGroups
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun HomeScreenFullReturnActivePreview() {
-    RoadbookTheme {
-        HomeScreenPreviewLayout(
-            drivingState = DrivingState.RETURN_ACTIVE,
-            trips = listOf(previewReturnActiveTrip),
-            tripGroups = previewTripGroups
-        )
-    }
-}
-
-@DevicePreview
-@Composable
-private fun HomeScreenFullCompletedPreview() {
-    RoadbookTheme {
-        HomeScreenPreviewLayout(
-            drivingState = DrivingState.COMPLETED,
-            trips = listOf(previewArrivedTrip, previewReturnActiveTrip),
-            tripGroups = previewTripGroups
-        )
-    }
 }
