@@ -15,10 +15,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.TripGroup
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.florent.carnetconduite.util.formatDate
+import com.florent.carnetconduite.util.formatTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -523,25 +521,5 @@ private fun TripDetailItem(
                 )
             }
         }
-    }
-}
-
-private fun formatDate(dateString: String): String {
-    return try {
-        val parts = dateString.split("-")
-        "${parts[2]}/${parts[1]}/${parts[0]}"
-    } catch (e: Exception) {
-        dateString
-    }
-}
-
-private fun formatTime(timestamp: Long): String {
-    return try {
-        val instant = Instant.ofEpochMilli(timestamp)
-        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
-    } catch (e: Exception) {
-        "N/A"
     }
 }
