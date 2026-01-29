@@ -135,11 +135,29 @@ fun ReturnActiveScreenPrimaryAction(
     state: ReturnActiveScreenState,
     viewModel: HomeViewModel
 ) {
+    ReturnActiveScreenPrimaryAction(
+        trip = trip,
+        state = state,
+        onFinishReturn = { tripId, endKm ->
+            viewModel.finishReturn(
+                tripId = tripId,
+                endKm = endKm
+            )
+        }
+    )
+}
+
+@Composable
+fun ReturnActiveScreenPrimaryAction(
+    trip: Trip,
+    state: ReturnActiveScreenState,
+    onFinishReturn: (Long, Int) -> Unit
+) {
     FilledTonalButton(
         onClick = {
-            viewModel.finishReturn(
-                tripId = trip.id,
-                endKm = state.endKm.toIntOrNull() ?: 0
+            onFinishReturn(
+                trip.id,
+                state.endKm.toIntOrNull() ?: 0
             )
         },
         modifier = Modifier

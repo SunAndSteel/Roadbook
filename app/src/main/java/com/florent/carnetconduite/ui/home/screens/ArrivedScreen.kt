@@ -237,9 +237,22 @@ fun ArrivedScreenContent(trip: Trip, state: ArrivedScreenState) {
 
 @Composable
 fun ArrivedScreenPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
+    ArrivedScreenPrimaryAction(
+        trip = trip,
+        onPrepareReturn = { tripId -> viewModel.prepareReturnTrip(tripId) },
+        onConfirmSimpleTrip = { tripId -> viewModel.confirmSimpleTrip(tripId) }
+    )
+}
+
+@Composable
+fun ArrivedScreenPrimaryAction(
+    trip: Trip,
+    onPrepareReturn: (Long) -> Unit,
+    onConfirmSimpleTrip: (Long) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         FilledTonalButton(
-            onClick = { viewModel.prepareReturnTrip(trip.id) },
+            onClick = { onPrepareReturn(trip.id) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -258,7 +271,7 @@ fun ArrivedScreenPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
         }
 
         OutlinedButton(
-            onClick = { viewModel.confirmSimpleTrip(trip.id) },
+            onClick = { onConfirmSimpleTrip(trip.id) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
