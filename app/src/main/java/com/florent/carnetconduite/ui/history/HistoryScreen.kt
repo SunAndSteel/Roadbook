@@ -69,7 +69,9 @@ fun HistoryScreen(
             if (tripGroups.isEmpty()) {
                 // État vide
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
                     Text(
@@ -80,6 +82,9 @@ fun HistoryScreen(
                 }
             } else {
                 LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(tripGroups) { group ->
