@@ -16,8 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.ui.preview.DevicePreview
-import com.florent.carnetconduite.ui.preview.RoadbookTheme
 
 @Composable
 fun StatsHeader(
@@ -351,18 +349,5 @@ private fun formatDuration(milliseconds: Long): String {
         hours > 0 -> "${hours}h ${minutes}min"
         minutes > 0 -> "${minutes}min"
         else -> "< 1min"
-    }
-}
-
-@DevicePreview
-@Composable
-private fun StatsHeaderPreview() {
-    RoadbookTheme {
-        StatsHeader(
-            totalDistance = 820,
-            totalDuration = 12 * 60 * 60 * 1000L,
-            tripCount = 14,
-            goalDistance = 1500
-        )
     }
 }

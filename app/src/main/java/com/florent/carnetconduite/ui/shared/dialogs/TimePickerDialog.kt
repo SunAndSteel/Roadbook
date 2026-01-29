@@ -8,8 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.ui.preview.DevicePreview
-import com.florent.carnetconduite.ui.preview.RoadbookTheme
 import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
@@ -72,16 +70,4 @@ fun TimePickerDialog(
             }
         }
     )
-}
-
-@DevicePreview
-@Composable
-private fun TimePickerDialogPreview() {
-    RoadbookTheme {
-        TimePickerDialog(
-            initialTime = System.currentTimeMillis(),
-            onDismiss = {},
-            onConfirm = {}
-        )
-    }
 }
