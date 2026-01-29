@@ -14,6 +14,7 @@ import com.florent.carnetconduite.domain.usecases.FinishOutwardUseCase
 import com.florent.carnetconduite.domain.usecases.FinishReturnUseCase
 import com.florent.carnetconduite.domain.usecases.StartOutwardUseCase
 import com.florent.carnetconduite.domain.usecases.StartReturnUseCase
+import com.florent.carnetconduite.domain.utils.AppLogger
 import com.florent.carnetconduite.domain.utils.Result
 import com.florent.carnetconduite.repository.TripRepository
 import com.florent.carnetconduite.ui.UiEvent
@@ -42,7 +43,8 @@ class HomeViewModel(
     private val cancelReturnUseCase: CancelReturnUseCase,
     private val editTripUseCase: EditTripUseCase,
     private val computeStateUseCase: ComputeDrivingStateUseCase,
-    repository: TripRepository
+    repository: TripRepository,
+    private val logger: AppLogger
 ) : ViewModel() {
 
     private val _uiEvent = MutableSharedFlow<UiEvent>()
@@ -115,6 +117,17 @@ class HomeViewModel(
         _uiEvent.emit(event)
     }
 
+    private suspend fun emitError(
+        operation: String,
+        exception: Exception,
+        message: String = "Une erreur est survenue. Réessaie.",
+        context: String? = null
+    ) {
+        val contextSuffix = context?.let { " ($it)" } ?: ""
+        logger.logError("HomeViewModel:$operation failed$contextSuffix", exception)
+        sendUiEvent(UiEvent.ShowError(message))
+    }
+
     private fun triggerCompletionLatch() {
         viewModelScope.launch {
             completionLatch.value = true
@@ -135,7 +148,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Trajet démarré"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "startOutward",
+                        exception = result.exception,
+                        context = "startKm=$startKm"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -150,15 +167,23 @@ class HomeViewModel(
                 }
                 is Result.Error -> {
                     if (result.exception is FinishOutwardUseCase.KmInconsistencyException) {
+                        logger.logError(
+                            "HomeViewModel:finishOutward km inconsistency (tripId=$tripId)",
+                            result.exception
+                        )
                         sendUiEvent(
                             UiEvent.ShowConfirmDialog(
                                 title = "Confirmation",
-                                message = result.message ?: "Confirmer l'opération ?",
+                                message = "Le kilométrage saisi semble incohérent. Confirmer l'opération ?",
                                 onConfirm = { finishOutwardForce(tripId, endKm, endPlace) }
                             )
                         )
                     } else {
-                        sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                        emitError(
+                            operation = "finishOutward",
+                            exception = result.exception,
+                            context = "tripId=$tripId"
+                        )
                     }
                 }
                 is Result.Loading -> {}
@@ -173,7 +198,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Trajet terminé"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "finishOutwardForce",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -187,7 +216,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Retour démarré"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "startReturn",
+                        exception = result.exception,
+                        context = "tripId=$returnTripId"
+                    )
                 }
 
                 is Result.Loading -> {}
@@ -210,7 +243,11 @@ class HomeViewModel(
                     }
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "decideTripType",
+                        exception = result.exception,
+                        context = "tripId=$tripId, prepareReturn=$prepareReturn"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -234,15 +271,23 @@ class HomeViewModel(
                 }
                 is Result.Error -> {
                     if (result.exception is FinishOutwardUseCase.KmInconsistencyException) {
+                        logger.logError(
+                            "HomeViewModel:finishReturn km inconsistency (tripId=$tripId)",
+                            result.exception
+                        )
                         sendUiEvent(
                             UiEvent.ShowConfirmDialog(
                                 title = "Confirmation",
-                                message = result.message ?: "Confirmer l'opération ?",
+                                message = "Le kilométrage saisi semble incohérent. Confirmer l'opération ?",
                                 onConfirm = { finishReturnForce(tripId, endKm) }
                             )
                         )
                     } else {
-                        sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                        emitError(
+                            operation = "finishReturn",
+                            exception = result.exception,
+                            context = "tripId=$tripId"
+                        )
                     }
                 }
                 is Result.Loading -> {}
@@ -257,7 +302,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Retour terminé"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "finishReturnForce",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -271,7 +320,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Retour annulé"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "cancelReturn",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -285,7 +338,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Heure modifiée"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "editStartTime",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -299,7 +356,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Heure modifiée"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "editEndTime",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -313,7 +374,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Kilométrage modifié"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "editStartKm",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
@@ -327,7 +392,11 @@ class HomeViewModel(
                     sendUiEvent(UiEvent.ShowToast("Kilométrage modifié"))
                 }
                 is Result.Error -> {
-                    sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
+                    emitError(
+                        operation = "editEndKm",
+                        exception = result.exception,
+                        context = "tripId=$tripId"
+                    )
                 }
                 is Result.Loading -> {}
             }
