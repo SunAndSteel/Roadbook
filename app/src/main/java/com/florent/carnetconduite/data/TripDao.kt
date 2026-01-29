@@ -98,7 +98,7 @@ interface TripDao {
         // Créer le trajet retour en statut READY
         val returnTrip = Trip(
             startKm = endKm,
-            startPlace = trip.endPlace ?: "",
+            startPlace = endPlace,
             endPlace = trip.startPlace,
             startTime = 0L,
             isReturn = true,
