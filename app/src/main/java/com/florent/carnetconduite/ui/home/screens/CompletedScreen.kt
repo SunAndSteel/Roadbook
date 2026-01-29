@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.screens
+package com.florent.carnetconduite.ui.home.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.ui.DrivingViewModel
+import com.florent.carnetconduite.ui.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CompletedScreen(viewModel: DrivingViewModel = koinViewModel()) {
+fun CompletedScreen(viewModel: HomeViewModel = koinViewModel()) {
     val tripGroups by viewModel.tripGroups.collectAsState()
     val completedCount = tripGroups.count { it.isComplete }
 

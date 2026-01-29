@@ -1,10 +1,8 @@
-package com.florent.carnetconduite.ui.screens
+package com.florent.carnetconduite.ui.home.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -16,8 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.DrivingViewModel
-import com.florent.carnetconduite.ui.dialogs.EditKmDialog
-import com.florent.carnetconduite.ui.dialogs.TimePickerDialog
+import com.florent.carnetconduite.ui.home.HomeViewModel
+import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
+import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -27,7 +26,7 @@ import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
-fun ArrivedScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel()) {
+fun ArrivedScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
     var showEditEndTime by remember { mutableStateOf(false) }
     var showEditEndKm by remember { mutableStateOf(false) }
 

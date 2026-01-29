@@ -1,17 +1,18 @@
+import com.android.build.api.dsl.ApplicationExtension
+
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
+    id("jacoco")
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
-
-android {
+configure<ApplicationExtension> {
     namespace = "com.florent.carnetconduite"
     compileSdk = 36
 
@@ -29,7 +30,7 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -47,7 +48,6 @@ android {
         compose = true
     }
 
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -55,38 +55,72 @@ android {
     }
 }
 
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*",
+        "**/Manifest*.*", "**/*Test*.*", "android/**/*.*"
+    )
+
+    val debugTree = layout.buildDirectory.dir("tmp/kotlin-classes/debug").map { dir ->
+        fileTree(dir) { exclude(fileFilter) }
+    }
+
+
+    val mainSrc = android.sourceSets.getByName("main").java.directories
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(debugTree)
+
+    executionData.setFrom(layout.buildDirectory.file("jacoco/testDebugUnitTest.exec"))
+}
 dependencies {
-    // Core Android
+    // Core & Lifecycle
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-    implementation("androidx.activity:activity-compose:1.12.2")
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Compose
-    implementation(platform("androidx.compose:compose-bom:2026.01.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation(libs.androidx.material3)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.navigation.compose)
 
+    // Data & Persistence
     implementation(libs.material)
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
-    implementation("androidx.navigation:navigation-compose:2.7.6")
-
-    // Room Database
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp("androidx.room:room-compiler:2.8.4")
+    ksp(libs.androidx.room.compiler)
 
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-
-    // Koin DI
+    // DI & Coroutines
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
+    implementation(libs.kotlinx.coroutines.android)
 
-    // Debug
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Tests
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.androidx.room.testing)
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }

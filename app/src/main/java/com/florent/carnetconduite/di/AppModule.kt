@@ -2,67 +2,62 @@ package com.florent.carnetconduite.di
 
 import com.florent.carnetconduite.data.AppDatabase
 import com.florent.carnetconduite.domain.usecases.*
-import com.florent.carnetconduite.domain.utils.AndroidAppLogger
 import com.florent.carnetconduite.domain.utils.AppLogger
 import com.florent.carnetconduite.domain.validators.TripValidator
+import com.florent.carnetconduite.repository.SettingsRepository
 import com.florent.carnetconduite.repository.TripRepository
-import com.florent.carnetconduite.ui.DrivingViewModel
+import com.florent.carnetconduite.ui.home.HomeViewModel
+import com.florent.carnetconduite.ui.history.HistoryViewModel
+import com.florent.carnetconduite.ui.settings.SettingsViewModel
+import com.florent.carnetconduite.ui.theme.ThemePreferences
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 /**
- * Module Koin pour l'injection de dépendances de l'application.
- * Définit comment créer et injecter toutes les dépendances.
+ * Module Koin refactoré avec ViewModels séparés
  */
 val appModule = module {
 
-    // ====== DATA LAYER ======
+    // ==================== DATA LAYER ====================
 
-    /**
-     * Database Room (Singleton)
-     */
     single {
         AppDatabase.getDatabase(androidContext())
     }
 
-    /**
-     * DAO (depuis la database)
-     */
     single {
         get<AppDatabase>().tripDao()
     }
 
-    /**
-     * Repository (Singleton)
-     */
+    single {
+        SettingsRepository(androidContext())
+    }
+
+    single {
+        AppPreferences(androidContext())
+    }
+
+    // ==================== REPOSITORY LAYER ====================
+
     single {
         TripRepository(
             tripDao = get(),
-            context = androidContext()
+            logger = get()
         )
     }
 
-    // ====== DOMAIN LAYER ======
+    // ==================== DOMAIN LAYER ====================
 
-    /**
-     * Logger (Singleton)
-     */
-    single<AppLogger> {
-        AndroidAppLogger()
-    }
+    // Utils
+    single { AppLogger }
+    single { TripValidator }
 
-    /**
-     * Validator (Object singleton - pas besoin de factory)
-     */
+    // Use Cases
     single {
-        TripValidator
+        ComputeDrivingStateUseCase()
     }
 
-    // ====== USE CASES ======
-    // Factory: nouvelle instance à chaque injection
-
-    factory {
+    single {
         StartOutwardUseCase(
             repository = get(),
             validator = get(),
@@ -70,7 +65,7 @@ val appModule = module {
         )
     }
 
-    factory {
+    single {
         FinishOutwardUseCase(
             repository = get(),
             validator = get(),
@@ -78,14 +73,7 @@ val appModule = module {
         )
     }
 
-    factory {
-        DecideTripTypeUseCase(
-            repository = get(),
-            logger = get()
-        )
-    }
-
-    factory {
+    single {
         StartReturnUseCase(
             repository = get(),
             validator = get(),
@@ -93,56 +81,51 @@ val appModule = module {
         )
     }
 
-    factory {
-        FinishReturnUseCase(
-            repository = get(),
-            validator = get(),
-            logger = get()
-        )
-    }
-
-    factory {
-        CancelReturnUseCase(
+    single {
+        DecideTripTypeUseCase(
             repository = get(),
             logger = get()
         )
     }
 
-    factory {
-        EditTripUseCase(
-            repository = get(),
-            validator = get(),
-            logger = get()
-        )
-    }
-
-    factory {
-        ComputeDrivingStateUseCase()
-    }
-
-    factory {
+    single {
         DeleteTripGroupUseCase(
             repository = get(),
             logger = get()
         )
     }
 
-    // ====== PRESENTATION LAYER ======
+    // ==================== VIEWMODEL LAYER ====================
 
     /**
-     * ViewModel avec injection automatique de tous les use cases
+     * HomeViewModel - Gère l'état actuel de conduite
      */
     viewModel {
-        DrivingViewModel(
+        HomeViewModel(
+            computeDrivingStateUseCase = get(),
             startOutwardUseCase = get(),
             finishOutwardUseCase = get(),
-            decideTripTypeUseCase = get(),
             startReturnUseCase = get(),
-            finishReturnUseCase = get(),
-            cancelReturnUseCase = get(),
-            editTripUseCase = get(),
-            computeStateUseCase = get(),
-            deleteTripGroupUseCase = get(),
+            decideTripTypeUseCase = get(),
+            repository = get()
+        )
+    }
+
+    /**
+     * HistoryViewModel - Gère l'historique des trajets
+     */
+    viewModel {
+        HistoryViewModel(
+            repository = get(),
+            deleteTripGroupUseCase = get()
+        )
+    }
+
+    /**
+     * SettingsViewModel - Gère les préférences
+     */
+    viewModel {
+        SettingsViewModel(
             repository = get()
         )
     }

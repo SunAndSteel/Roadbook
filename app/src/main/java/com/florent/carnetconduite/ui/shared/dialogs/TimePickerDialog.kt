@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.dialogs
+package com.florent.carnetconduite.ui.shared.dialogs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions

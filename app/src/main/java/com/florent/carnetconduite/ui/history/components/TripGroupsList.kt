@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.components
+package com.florent.carnetconduite.ui.history.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
-import com.florent.carnetconduite.ui.dialogs.EditTripGroupDialog
+import com.florent.carnetconduite.ui.history.dialogs.EditTripGroupDialog
 
 @Composable
 fun TripGroupsList(

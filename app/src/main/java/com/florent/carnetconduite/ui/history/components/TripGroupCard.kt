@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.components
+package com.florent.carnetconduite.ui.history.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring

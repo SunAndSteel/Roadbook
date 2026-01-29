@@ -1,11 +1,9 @@
-package com.florent.carnetconduite.ui.screens
+package com.florent.carnetconduite.ui.home.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -18,7 +16,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.DrivingViewModel
-import com.florent.carnetconduite.ui.dialogs.TimePickerDialog
+import com.florent.carnetconduite.ui.home.HomeViewModel
+import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -26,9 +25,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel()) {
+fun ReturnActiveScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
     var endKm by remember { mutableStateOf("") }
-    var endPlace by remember { mutableStateOf("") }
     var showEditStartTime by remember { mutableStateOf(false) }
 
     ElevatedCard(
@@ -37,18 +35,15 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
             .animateContentSize(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
         ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 4.dp
         )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
-
         ) {
             // En-tête avec indicateur actif
             Row(
@@ -62,7 +57,7 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(56.dp)
                     ) {
                         Box(
@@ -70,25 +65,25 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.DirectionsCar,
+                                imageVector = Icons.Rounded.KeyboardReturn,
                                 contentDescription = null,
                                 modifier = Modifier.size(32.dp),
-                                tint = MaterialTheme.colorScheme.onSecondary
+                                tint = MaterialTheme.colorScheme.onTertiary
                             )
                         }
                     }
 
                     Column {
                         Text(
-                            text = "Trajet en cours",
+                            text = "Retour en cours",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         Text(
-                            text = "Trajet aller",
+                            text = "Trajet retour",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
                             modifier = Modifier.alpha(0.7f)
                         )
                     }
@@ -122,43 +117,51 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
             }
 
             HorizontalDivider(
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f)
+                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f)
             )
 
-            // Informations du trajet en cours
+            // Trajet
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.SyncAlt,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Column {
+                        Text(
+                            text = "${trip.startPlace} → ${trip.endPlace ?: ""}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Aller-retour",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.alpha(0.7f)
+                        )
+                    }
+                }
+            }
+
+            // Informations de départ du retour
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     text = "Informations de départ",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-
-                // Lieu de départ
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = trip.startPlace,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
-                    supportingContent = {
-                        Text("Lieu de départ")
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
 
                 // Kilométrage départ
@@ -171,7 +174,7 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                         )
                     },
                     supportingContent = {
-                        Text("Kilométrage départ")
+                        Text("Kilométrage départ retour")
                     },
                     leadingContent = {
                         Icon(
@@ -186,43 +189,45 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Heure de départ (éditable)
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = formatTime(trip.startTime),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
-                    supportingContent = {
-                        Text("Heure de départ")
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Schedule,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showEditStartTime = true }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Edit,
-                                contentDescription = "Modifier l'heure",
-                                modifier = Modifier.size(20.dp)
+                // Heure de départ (éditable si > 0)
+                if (trip.startTime > 0L) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = formatTime(trip.startTime),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold
                             )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                        },
+                        supportingContent = {
+                            Text("Heure de départ")
+                        },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Rounded.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        trailingContent = {
+                            IconButton(onClick = { showEditStartTime = true }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Edit,
+                                    contentDescription = "Modifier l'heure",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             HorizontalDivider(
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f)
+                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f)
             )
 
             // Saisir l'arrivée
@@ -230,10 +235,10 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Saisir l'arrivée",
+                    text = "Fin du retour",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
 
                 OutlinedTextField(
@@ -254,33 +259,14 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     )
                 )
-
-                OutlinedTextField(
-                    value = endPlace,
-                    onValueChange = { endPlace = it },
-                    label = { Text("Lieu d'arrivée") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = null
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                    )
-                )
             }
 
-            // Bouton terminer
+            // Bouton terminer le retour
             Button(
                 onClick = {
-                    viewModel.finishOutward(
+                    viewModel.finishReturn(
                         tripId = trip.id,
-                        endKm = endKm.toIntOrNull() ?: 0,
-                        endPlace = endPlace
+                        endKm = endKm.toIntOrNull() ?: 0
                     )
                 },
                 modifier = Modifier
@@ -288,17 +274,17 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    containerColor = MaterialTheme.colorScheme.tertiary
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Flag,
+                    imageVector = Icons.Rounded.CheckCircle,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Terminer le trajet",
+                    text = "Terminer le retour",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -307,7 +293,7 @@ fun OutwardActiveScreen(trip: Trip, viewModel: DrivingViewModel = koinViewModel(
     }
 
     // Dialog d'édition de l'heure
-    if (showEditStartTime) {
+    if (showEditStartTime && trip.startTime > 0L) {
         TimePickerDialog(
             initialTime = trip.startTime,
             onDismiss = { showEditStartTime = false },

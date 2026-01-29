@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.components
+package com.florent.carnetconduite.ui.home.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -209,12 +211,12 @@ fun StatsHeader(
 
 @Composable
 private fun StatCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     value: String,
     unit: String,
     label: String,
-    containerColor: androidx.compose.ui.graphics.Color,
-    contentColor: androidx.compose.ui.graphics.Color,
+    containerColor: Color,
+    contentColor: Color,
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(

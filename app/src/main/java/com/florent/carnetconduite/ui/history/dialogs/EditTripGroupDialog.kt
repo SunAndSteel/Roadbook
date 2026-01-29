@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.dialogs
+package com.florent.carnetconduite.ui.history.dialogs
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
@@ -11,10 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
+import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
+import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -252,10 +256,14 @@ fun EditTripGroupDialog(
     // TimePickerDialog
     showTimePicker?.let { (trip, type) ->
         TimePickerDialog(
-            initialTime = if (type == "start") trip.startTime else trip.endTime ?: System.currentTimeMillis(),
+            initialTime = if (type == "start") trip.startTime else trip.endTime
+                ?: System.currentTimeMillis(),
             onDismiss = { showTimePicker = null },
             onConfirm = { newTime ->
-                if (type == "start") onEditStartTime(trip, newTime) else onEditEndTime(trip, newTime)
+                if (type == "start") onEditStartTime(trip, newTime) else onEditEndTime(
+                    trip,
+                    newTime
+                )
                 showTimePicker = null
             }
         )
@@ -277,12 +285,12 @@ fun EditTripGroupDialog(
 
 @Composable
 private fun EditFieldCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     value: String,
     onClick: () -> Unit,
-    containerColor: androidx.compose.ui.graphics.Color,
-    contentColor: androidx.compose.ui.graphics.Color
+    containerColor: Color,
+    contentColor: Color
 ) {
     ElevatedCard(
         onClick = onClick,

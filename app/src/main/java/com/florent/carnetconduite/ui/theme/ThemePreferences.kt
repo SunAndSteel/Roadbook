@@ -15,7 +15,7 @@ object ThemePreferences {
     fun getThemeMode(context: Context): Flow<ThemeMode> =
         context.dataStore.data.map { prefs ->
             ThemeMode.valueOf(
-                prefs[THEME_MODE_KEY] ?: ThemeMode.Dynamic.name
+                prefs[THEME_MODE_KEY] ?: ThemeMode.DYNAMIC.name
             )
         }
 

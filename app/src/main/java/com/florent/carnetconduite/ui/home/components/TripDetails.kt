@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.components
+package com.florent.carnetconduite.ui.home.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
@@ -149,7 +150,7 @@ fun TripDetails(
                         }
                     },
                     colors = ListItemDefaults.colors(
-                        containerColor = androidx.compose.ui.graphics.Color.Transparent
+                        containerColor = Color.Transparent
                     )
                 )
 
@@ -203,7 +204,7 @@ fun TripDetails(
                         }
                     },
                     colors = ListItemDefaults.colors(
-                        containerColor = androidx.compose.ui.graphics.Color.Transparent
+                        containerColor = Color.Transparent
                     )
                 )
 
@@ -247,7 +248,7 @@ fun TripDetails(
                             )
                         },
                         colors = ListItemDefaults.colors(
-                            containerColor = androidx.compose.ui.graphics.Color.Transparent
+                            containerColor = Color.Transparent
                         )
                     )
                 }
@@ -292,7 +293,7 @@ fun TripDetails(
                             )
                         },
                         colors = ListItemDefaults.colors(
-                            containerColor = androidx.compose.ui.graphics.Color.Transparent
+                            containerColor = Color.Transparent
                         )
                     )
                 }

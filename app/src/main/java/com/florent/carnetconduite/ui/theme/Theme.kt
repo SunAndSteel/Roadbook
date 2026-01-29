@@ -1,6 +1,7 @@
 package com.florent.carnetconduite.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -11,9 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 
 // --- MODE DE THÈME ---
 enum class ThemeMode {
-    Dynamic,
-    Light,
-    Dark
+    DYNAMIC,
+    LIGHT,
+    DARK
 }
 
 // --- PALETTE MODERNE ---
@@ -105,19 +106,21 @@ private val DarkColors = darkColorScheme(
 // --- THEME PRINCIPAL ---
 @Composable
 fun CarnetConduiteTheme(
-    themeMode: ThemeMode = ThemeMode.Dynamic,
+    themeMode: ThemeMode = ThemeMode.DYNAMIC,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
 
+    val isDarkTheme = isSystemInDarkTheme()
+
     val colorScheme = when (themeMode) {
-        ThemeMode.Dynamic -> {
-            // Le système décide light/dark automatiquement
-            dynamicLightColorScheme(context)
+        ThemeMode.DYNAMIC -> {
+            if (isDarkTheme) dynamicDarkColorScheme(context)
+            else dynamicLightColorScheme(context)
         }
 
-        ThemeMode.Light -> LightColors
-        ThemeMode.Dark -> DarkColors
+        ThemeMode.LIGHT -> LightColors
+        ThemeMode.DARK -> DarkColors
     }
 
     MaterialTheme(
@@ -128,7 +131,7 @@ fun CarnetConduiteTheme(
 
 @Composable
 fun themeIcon(themeMode: ThemeMode): ImageVector = when (themeMode) {
-    ThemeMode.Dynamic -> Icons.Default.AutoAwesome
-    ThemeMode.Light -> Icons.Default.LightMode
-    ThemeMode.Dark -> Icons.Default.DarkMode
+    ThemeMode.DYNAMIC -> Icons.Default.AutoAwesome
+    ThemeMode.LIGHT -> Icons.Default.LightMode
+    ThemeMode.DARK -> Icons.Default.DarkMode
 }

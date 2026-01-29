@@ -22,9 +22,9 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Créer nouvelle table avec structure complète
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE IF NOT EXISTS trips_new (
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         startKm INTEGER NOT NULL,
@@ -43,7 +43,7 @@ abstract class AppDatabase : RoomDatabase() {
                 """.trimIndent())
 
                 // Migrer les données existantes si la table trips existe
-                database.execSQL("""
+                db.execSQL("""
                     INSERT OR IGNORE INTO trips_new (
                         id, startKm, endKm, startPlace, endPlace, startTime, endTime,
                         isReturn, pairedTripId, status, conditions, guide, date
@@ -66,8 +66,8 @@ abstract class AppDatabase : RoomDatabase() {
                 """.trimIndent())
 
                 // Supprimer ancienne table et renommer
-                database.execSQL("DROP TABLE IF EXISTS trips")
-                database.execSQL("ALTER TABLE trips_new RENAME TO trips")
+                db.execSQL("DROP TABLE IF EXISTS trips")
+                db.execSQL("ALTER TABLE trips_new RENAME TO trips")
             }
         }
 
