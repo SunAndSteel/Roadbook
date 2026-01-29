@@ -447,6 +447,14 @@ private fun GuideSelectionDialog(
                             text = "Guide $guide",
                             style = MaterialTheme.typography.bodyLarge
                         )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Fermer")
+            }
         }
     }
 }
