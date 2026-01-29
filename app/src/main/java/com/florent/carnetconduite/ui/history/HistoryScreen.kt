@@ -9,13 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.components.StatsHeader
 import com.florent.carnetconduite.ui.history.components.TripGroupCard
 import com.florent.carnetconduite.ui.history.dialogs.EditTripGroupDialog
-import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -30,6 +28,7 @@ fun HistoryScreen(
     val tripGroups by viewModel.tripGroups.collectAsState(initial = emptyList())
     val tripStats by viewModel.tripStats.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var selectedGroupForEdit by remember { mutableStateOf<TripGroup?>(null) }
 
@@ -41,7 +40,7 @@ fun HistoryScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
                 is UiEvent.ShowError -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                    snackbarHostState.showSnackbar(message = event.message)
                 }
                 is UiEvent.ShowConfirmDialog -> {
                     // Géré par les cards
@@ -50,46 +49,52 @@ fun HistoryScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Header avec statistiques
-        StatsHeader(
-            totalDistance = tripStats.totalKm,
-            totalDuration = (tripStats.totalHours * 3600000).toLong(), // hours → ms
-            tripCount = tripStats.totalTrips,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            // Header avec statistiques
+            StatsHeader(
+                totalDistance = tripStats.totalKm,
+                totalDuration = (tripStats.totalHours * 3600000).toLong(), // hours → ms
+                tripCount = tripStats.totalTrips,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        // Liste des trajets
-        if (tripGroups.isEmpty()) {
-            // État vide
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                Text(
-                    text = "Aucun trajet dans l'historique",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(tripGroups) { group ->
-                    TripGroupCard(
-                        tripGroup = group,
-                        onEdit = {
-                            selectedGroupForEdit = group
-                        },
-                        onDelete = {
-                            viewModel.deleteTripGroup(group)
-                        }
+            // Liste des trajets
+            if (tripGroups.isEmpty()) {
+                // État vide
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Text(
+                        text = "Aucun trajet dans l'historique",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(tripGroups) { group ->
+                        TripGroupCard(
+                            tripGroup = group,
+                            onEdit = {
+                                selectedGroupForEdit = group
+                            },
+                            onDelete = {
+                                viewModel.deleteTripGroup(group)
+                            }
+                        )
+                    }
                 }
             }
         }
