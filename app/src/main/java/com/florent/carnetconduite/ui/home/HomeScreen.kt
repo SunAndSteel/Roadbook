@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
+import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenContent
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenDialogs
@@ -565,13 +566,17 @@ private fun colorsForState(state: DrivingState): StepColors {
 
 private fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
     return when (state) {
-        DrivingState.OUTWARD_ACTIVE -> trips.find { it.endKm == null && !it.isReturn }
+        DrivingState.OUTWARD_ACTIVE -> trips.find {
+            it.endKm == null && !it.isReturn && it.status == TripStatus.ACTIVE
+        }
         DrivingState.ARRIVED -> trips.find {
             !it.isReturn && it.endKm != null &&
                 trips.none { return@none it.pairedTripId == trips.find { !it.isReturn }?.id && it.isReturn }
         }
-        DrivingState.RETURN_READY -> trips.find { it.isReturn && it.endKm == null }
-        DrivingState.RETURN_ACTIVE -> trips.find { it.isReturn && it.endKm == null }
+        DrivingState.RETURN_READY -> trips.find { it.isReturn && it.status == TripStatus.READY }
+        DrivingState.RETURN_ACTIVE -> trips.find {
+            it.isReturn && it.endKm == null && it.status == TripStatus.ACTIVE
+        }
         else -> null
     }
 }

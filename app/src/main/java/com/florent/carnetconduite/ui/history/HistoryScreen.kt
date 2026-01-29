@@ -103,16 +103,22 @@ fun HistoryScreen(
                 selectedGroupForEdit = null
             },
             onEditStartTime = { trip, newTime ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editStartTime(trip.id, newTime)
             },
             onEditEndTime = { trip, newTime ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editEndTime(trip.id, newTime)
             },
             onEditStartKm = { trip, newKm ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editStartKm(trip.id, newKm)
             },
             onEditEndKm = { trip, newKm ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editEndKm(trip.id, newKm)
+            },
+            onEditDate = { trip, newDate ->
+                viewModel.editDate(trip.id, newDate)
+            },
+            onEditConditions = { trip, newConditions ->
+                viewModel.editConditions(trip.id, newConditions)
             }
         )
     }

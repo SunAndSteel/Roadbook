@@ -32,10 +32,14 @@ fun EditTripGroupDialog(
     onEditStartTime: (Trip, Long) -> Unit,
     onEditEndTime: (Trip, Long) -> Unit,
     onEditStartKm: (Trip, Int) -> Unit,
-    onEditEndKm: (Trip, Int) -> Unit
+    onEditEndKm: (Trip, Int) -> Unit,
+    onEditDate: (Trip, String) -> Unit,
+    onEditConditions: (Trip, String) -> Unit
 ) {
     var showTimePicker by remember { mutableStateOf<Pair<Trip, String>?>(null) }
     var showKmPicker by remember { mutableStateOf<Pair<Trip, String>?>(null) }
+    var showDateEditor by remember { mutableStateOf<Trip?>(null) }
+    var showConditionsEditor by remember { mutableStateOf<Trip?>(null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -136,6 +140,28 @@ fun EditTripGroupDialog(
 
                 item {
                     EditFieldCard(
+                        icon = Icons.Rounded.CalendarToday,
+                        label = "Date",
+                        value = formatDate(group.outward.date),
+                        onClick = { showDateEditor = group.outward },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+
+                item {
+                    EditFieldCard(
+                        icon = Icons.Rounded.CloudQueue,
+                        label = "Conditions météo",
+                        value = group.outward.conditions.ifBlank { "Non renseignées" },
+                        onClick = { showConditionsEditor = group.outward },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+
+                item {
+                    EditFieldCard(
                         icon = Icons.Rounded.Speed,
                         label = "Kilométrage départ",
                         value = "${group.outward.startKm} km",
@@ -213,6 +239,28 @@ fun EditTripGroupDialog(
 
                     item {
                         EditFieldCard(
+                            icon = Icons.Rounded.CalendarToday,
+                            label = "Date",
+                            value = formatDate(group.returnTrip.date),
+                            onClick = { showDateEditor = group.returnTrip },
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+
+                    item {
+                        EditFieldCard(
+                            icon = Icons.Rounded.CloudQueue,
+                            label = "Conditions météo",
+                            value = group.returnTrip.conditions.ifBlank { "Non renseignées" },
+                            onClick = { showConditionsEditor = group.returnTrip },
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+
+                    item {
+                        EditFieldCard(
                             icon = Icons.Rounded.Speed,
                             label = "Kilométrage départ",
                             value = "${group.returnTrip.startKm} km",
@@ -278,6 +326,32 @@ fun EditTripGroupDialog(
             onConfirm = { newKm ->
                 if (type == "start") onEditStartKm(trip, newKm) else onEditEndKm(trip, newKm)
                 showKmPicker = null
+            }
+        )
+    }
+
+    showDateEditor?.let { trip ->
+        EditTextDialog(
+            title = "Modifier la date",
+            label = "Date (AAAA-MM-JJ)",
+            initialValue = trip.date,
+            onDismiss = { showDateEditor = null },
+            onConfirm = { newDate ->
+                onEditDate(trip, newDate)
+                showDateEditor = null
+            }
+        )
+    }
+
+    showConditionsEditor?.let { trip ->
+        EditTextDialog(
+            title = "Modifier les conditions météo",
+            label = "Conditions météo",
+            initialValue = trip.conditions,
+            onDismiss = { showConditionsEditor = null },
+            onConfirm = { newConditions ->
+                onEditConditions(trip, newConditions)
+                showConditionsEditor = null
             }
         )
     }
@@ -358,4 +432,55 @@ private fun formatTime(timestamp: Long): String {
     } catch (e: Exception) {
         "N/A"
     }
+}
+
+private fun formatDate(dateString: String): String {
+    return try {
+        val parts = dateString.split("-")
+        "${parts[2]}/${parts[1]}/${parts[0]}"
+    } catch (e: Exception) {
+        dateString
+    }
+}
+
+@Composable
+private fun EditTextDialog(
+    title: String,
+    label: String,
+    initialValue: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var value by remember(initialValue) { mutableStateOf(initialValue) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { value = it },
+                label = { Text(label) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            FilledTonalButton(
+                onClick = { onConfirm(value) }
+            ) {
+                Text("Enregistrer")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Annuler")
+            }
+        }
+    )
 }

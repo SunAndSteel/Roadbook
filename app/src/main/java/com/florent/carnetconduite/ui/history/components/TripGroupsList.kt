@@ -33,6 +33,8 @@ fun TripGroupsList(
     onEditEndTime: (Trip, Long) -> Unit,
     onEditStartKm: (Trip, Int) -> Unit,
     onEditEndKm: (Trip, Int) -> Unit,
+    onEditDate: (Trip, String) -> Unit,
+    onEditConditions: (Trip, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedGroupForEdit by remember { mutableStateOf<TripGroup?>(null) }
@@ -78,7 +80,9 @@ fun TripGroupsList(
             onEditStartTime = onEditStartTime,
             onEditEndTime = onEditEndTime,
             onEditStartKm = onEditStartKm,
-            onEditEndKm = onEditEndKm
+            onEditEndKm = onEditEndKm,
+            onEditDate = onEditDate,
+            onEditConditions = onEditConditions
         )
     }
 }
