@@ -246,7 +246,7 @@ fun SettingsScreen(
  * - Facile de changer le design de tous les items
  */
 @Composable
-private fun SettingsItem(
+internal fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
@@ -295,7 +295,7 @@ private fun SettingsItem(
  * Composable pour un item de setting avec Switch.
  */
 @Composable
-private fun SettingsSwitchItem(
+internal fun SettingsSwitchItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
@@ -341,7 +341,7 @@ private fun SettingsSwitchItem(
  * Header de section dans les settings.
  */
 @Composable
-private fun SettingsSectionHeader(
+internal fun SettingsSectionHeader(
     text: String,
     modifier: Modifier = Modifier
 ) {
@@ -360,7 +360,7 @@ private fun SettingsSectionHeader(
  * Chaque option est cliquable entièrement (pas juste le bouton radio).
  */
 @Composable
-private fun ThemeSelectionDialog(
+internal fun ThemeSelectionDialog(
     currentTheme: ThemeMode,
     onThemeSelected: (ThemeMode) -> Unit,
     onDismiss: () -> Unit
@@ -418,7 +418,7 @@ private fun ThemeSelectionDialog(
  * Dialogue de sélection du guide par défaut.
  */
 @Composable
-private fun GuideSelectionDialog(
+internal fun GuideSelectionDialog(
     currentGuide: String,
     onGuideSelected: (String) -> Unit,
     onDismiss: () -> Unit
@@ -448,6 +448,15 @@ private fun GuideSelectionDialog(
                     }
                 }
             }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Fermer")
+            }
+        }
+    }
+}
+
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {

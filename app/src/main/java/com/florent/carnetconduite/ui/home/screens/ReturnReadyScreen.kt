@@ -125,12 +125,34 @@ fun ReturnReadyScreenPrimaryAction(
     state: ReturnReadyScreenState,
     viewModel: HomeViewModel
 ) {
+    ReturnReadyScreenPrimaryAction(
+        trip = trip,
+        state = state,
+        onStartReturn = { tripId, startKm ->
+            viewModel.startReturn(
+                returnTripId = tripId,
+                actualStartKm = startKm
+            )
+        },
+        onCancelReturn = { tripId ->
+            viewModel.cancelReturn(tripId)
+        }
+    )
+}
+
+@Composable
+fun ReturnReadyScreenPrimaryAction(
+    trip: Trip,
+    state: ReturnReadyScreenState,
+    onStartReturn: (Long, Int?) -> Unit,
+    onCancelReturn: (Long) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         FilledTonalButton(
             onClick = {
-                viewModel.startReturn(
-                    returnTripId = trip.id,
-                    actualStartKm = state.editedStartKm.toIntOrNull()
+                onStartReturn(
+                    trip.id,
+                    state.editedStartKm.toIntOrNull()
                 )
             },
             modifier = Modifier
@@ -151,7 +173,7 @@ fun ReturnReadyScreenPrimaryAction(
         }
 
         TextButton(
-            onClick = { viewModel.cancelReturn(trip.id) },
+            onClick = { onCancelReturn(trip.id) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(

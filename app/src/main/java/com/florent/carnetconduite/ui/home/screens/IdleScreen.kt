@@ -240,13 +240,31 @@ fun IdleScreenPrimaryAction(
     state: IdleScreenState,
     viewModel: HomeViewModel
 ) {
+    IdleScreenPrimaryAction(
+        state = state,
+        onStartOutward = { startKm, startPlace, conditions, guide ->
+            viewModel.startOutward(
+                startKm = startKm,
+                startPlace = startPlace,
+                conditions = conditions,
+                guide = guide
+            )
+        }
+    )
+}
+
+@Composable
+fun IdleScreenPrimaryAction(
+    state: IdleScreenState,
+    onStartOutward: (Int, String, String, String) -> Unit
+) {
     FilledTonalButton(
         onClick = {
-            viewModel.startOutward(
-                startKm = state.startKm.toIntOrNull() ?: 0,
-                startPlace = state.startPlace,
-                conditions = state.conditions,
-                guide = state.guide
+            onStartOutward(
+                state.startKm.toIntOrNull() ?: 0,
+                state.startPlace,
+                state.conditions,
+                state.guide
             )
         },
         modifier = Modifier

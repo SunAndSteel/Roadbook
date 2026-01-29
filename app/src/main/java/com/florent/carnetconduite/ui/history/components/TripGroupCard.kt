@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
+import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.util.formatDate
 import com.florent.carnetconduite.util.formatTime
 

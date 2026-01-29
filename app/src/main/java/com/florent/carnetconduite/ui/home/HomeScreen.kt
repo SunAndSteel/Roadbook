@@ -279,21 +279,21 @@ fun HomeScreen(
     }
 }
 
-private data class TripHeaderData(
+internal data class TripHeaderData(
     val icon: ImageVector,
     val title: String,
     val subtitle: String,
     val statusLabel: String
 )
 
-private data class StepColors(
+internal data class StepColors(
     val headerContainer: Color,
     val onHeaderContainer: Color,
     val statusColor: Color,
     val cardContainer: Color
 )
 
-private fun headerForState(state: DrivingState): TripHeaderData {
+internal fun headerForState(state: DrivingState): TripHeaderData {
     return when (state) {
         DrivingState.IDLE -> TripHeaderData(
             icon = Icons.Rounded.DirectionsCar,
@@ -335,7 +335,7 @@ private fun headerForState(state: DrivingState): TripHeaderData {
 }
 
 @Composable
-private fun TripHeader(
+internal fun TripHeader(
     header: TripHeaderData,
     statusColor: Color,
     containerColor: Color,
@@ -425,7 +425,7 @@ private fun TripHeader(
 }
 
 @Composable
-private fun TripSummary(
+internal fun TripSummary(
     trip: Trip?,
     stateLabel: String,
     accentColor: Color,
@@ -627,7 +627,7 @@ private fun PulsingDot(
 }
 
 @Composable
-private fun PrimaryActionArea(content: @Composable () -> Unit) {
+internal fun PrimaryActionArea(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -639,7 +639,7 @@ private fun PrimaryActionArea(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun colorsForState(state: DrivingState): StepColors {
+internal fun colorsForState(state: DrivingState): StepColors {
     val scheme = MaterialTheme.colorScheme
     return when (state) {
         DrivingState.IDLE -> StepColors(
@@ -681,7 +681,7 @@ private fun colorsForState(state: DrivingState): StepColors {
     }
 }
 
-private fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
+internal fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
     return when (state) {
         DrivingState.OUTWARD_ACTIVE -> trips.find {
             it.endKm == null && !it.isReturn && it.status == TripStatus.ACTIVE
