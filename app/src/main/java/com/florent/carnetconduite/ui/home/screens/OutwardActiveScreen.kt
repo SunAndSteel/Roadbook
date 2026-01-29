@@ -157,12 +157,31 @@ fun OutwardActiveScreenPrimaryAction(
     state: OutwardActiveScreenState,
     viewModel: HomeViewModel
 ) {
+    OutwardActiveScreenPrimaryAction(
+        trip = trip,
+        state = state,
+        onFinishOutward = { tripId, endKm, endPlace ->
+            viewModel.finishOutward(
+                tripId = tripId,
+                endKm = endKm,
+                endPlace = endPlace
+            )
+        }
+    )
+}
+
+@Composable
+fun OutwardActiveScreenPrimaryAction(
+    trip: Trip,
+    state: OutwardActiveScreenState,
+    onFinishOutward: (Long, Int, String) -> Unit
+) {
     FilledTonalButton(
         onClick = {
-            viewModel.finishOutward(
-                tripId = trip.id,
-                endKm = state.endKm.toIntOrNull() ?: 0,
-                endPlace = state.endPlace
+            onFinishOutward(
+                trip.id,
+                state.endKm.toIntOrNull() ?: 0,
+                state.endPlace
             )
         },
         modifier = Modifier

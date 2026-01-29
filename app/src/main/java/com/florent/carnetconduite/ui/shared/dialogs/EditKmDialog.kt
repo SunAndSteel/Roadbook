@@ -6,6 +6,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import com.florent.carnetconduite.ui.preview.DevicePreview
+import com.florent.carnetconduite.ui.preview.RoadbookTheme
 
 @Composable
 fun EditKmDialog(
@@ -41,4 +43,17 @@ fun EditKmDialog(
             }
         }
     )
+}
+
+@DevicePreview
+@Composable
+private fun EditKmDialogPreview() {
+    RoadbookTheme {
+        EditKmDialog(
+            title = "Modifier km arrivée",
+            initialKm = 12620,
+            onDismiss = {},
+            onConfirm = {}
+        )
+    }
 }
