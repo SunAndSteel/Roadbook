@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -43,6 +44,11 @@ fun CompletedScreen(viewModel: HomeViewModel = koinViewModel()) {
 @Composable
 fun CompletedScreenContent(viewModel: HomeViewModel) {
     val tripGroups by viewModel.tripGroups.collectAsState()
+    CompletedScreenContent(tripGroups = tripGroups)
+}
+
+@Composable
+fun CompletedScreenContent(tripGroups: List<TripGroup>) {
     val completedCount = tripGroups.count { group -> group.isComplete }
     val transitionState = remember { MutableTransitionState(false).apply { targetState = true } }
 
