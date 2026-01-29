@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -180,7 +178,6 @@ class MainActivity : ComponentActivity() {
  *
  * STRUCTURE :
  * Scaffold (cadre Material 3)
- *   ├─ TopBar (avec bouton Settings)
  *   ├─ BottomBar (navigation Home/History)
  *   └─ Content (NavHost)
  *
@@ -204,69 +201,18 @@ fun RoadbookApp(
     /**
      * Items de la bottom navigation.
      *
-     * QUESTION : Pourquoi Settings n'est pas ici ?
-     * Réponse : Settings est moins utilisé que Home/History.
-     * Material Design recommande de le mettre dans la top bar
-     * ou un menu overflow, pas dans la navigation principale.
+     * NOTE : Settings est inclus dans la bottom bar
+     * pour rester accessible après la suppression de la top bar.
      */
     val navigationItems = listOf(
         Screen.Home,
-        Screen.History
+        Screen.History,
+        Screen.Settings
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val currentTitle = when (currentRoute) {
-        Screen.Home.route -> Screen.Home.title
-        Screen.History.route -> Screen.History.title
-        Screen.Settings.route -> Screen.Settings.title
-        else -> "Roadbook"
-    }
 
     Scaffold(
-        topBar = {
-            SmallTopAppBar(
-                title = { Text(currentTitle) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                actions = {
-                    /**
-                     * NOUVEAU : Bouton Settings dans la top bar
-                     *
-                     * PATTERN : IconButton avec navigation
-                     *
-                     * FLUX :
-                     * 1. User clique sur l'icône Settings
-                     * 2. navController.navigate(Screen.Settings.route)
-                     * 3. NavHost détecte le changement
-                     * 4. Affiche SettingsScreenContainer
-                     * 5. SettingsViewModel est créé automatiquement par Koin
-                     * 6. Écran Settings s'affiche
-                     *
-                     * ANIMATION :
-                     * Compose Navigation gère automatiquement :
-                     * - Slide in from right (Settings entre)
-                     * - Slide out to left (Home sort)
-                     *
-                     * Personnalisable si besoin avec enterTransition/exitTransition.
-                     */
-                    if (currentRoute != Screen.Settings.route) {
-                        IconButton(
-                            onClick = {
-                                navController.navigate(Screen.Settings.route)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Paramètres"
-                            )
-                        }
-                    }
-                }
-            )
-        },
         bottomBar = {
             /**
              * Bottom Navigation Bar
