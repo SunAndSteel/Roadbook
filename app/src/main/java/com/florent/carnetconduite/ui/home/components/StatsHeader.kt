@@ -22,8 +22,13 @@ fun StatsHeader(
     totalDistance: Int,
     totalDuration: Long,
     tripCount: Int,
+    goalDistance: Int = 1500,
     modifier: Modifier = Modifier
 ) {
+    val clampedGoal = goalDistance.coerceAtLeast(1)
+    val progress = (totalDistance / clampedGoal.toFloat()).coerceIn(0f, 1f)
+    val remaining = (goalDistance - totalDistance).coerceAtLeast(0)
+
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -117,6 +122,54 @@ fun StatsHeader(
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     modifier = Modifier.weight(1f)
                 )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Objectif permis : ${goalDistance} km",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    LinearProgressIndicator(
+                        progress = progress,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${totalDistance} / ${goalDistance} km",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        if (totalDistance < goalDistance) {
+                            Text(
+                                text = "reste ${remaining} km",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
             }
 
             // Durée totale (si pertinent)

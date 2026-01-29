@@ -61,6 +61,7 @@ fun HistoryScreen(
                 totalDistance = tripStats.totalKm,
                 totalDuration = (tripStats.totalHours * 3600000).toLong(), // hours → ms
                 tripCount = tripStats.totalTrips,
+                goalDistance = 1500,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
