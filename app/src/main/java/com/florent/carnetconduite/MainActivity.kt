@@ -16,14 +16,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.florent.carnetconduite.domain.models.UserSettings
 import com.florent.carnetconduite.repository.SettingsRepository
-import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.navigation.NavGraph
 import com.florent.carnetconduite.ui.navigation.Screen
 import com.florent.carnetconduite.ui.theme.CarnetConduiteTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.koinViewModel
 
 /**
  * MainActivity : Point d'entrée de l'application.
@@ -202,20 +200,6 @@ fun RoadbookApp(
      * Survit aux recompositions.
      */
     val navController = rememberNavController()
-
-    /**
-     * ViewModel principal de l'app.
-     *
-     * koinViewModel() = récupère depuis Koin
-     * Scope : Lié à cette Activity
-     *
-     * QUESTION : Pourquoi le ViewModel est ici et pas dans NavGraph ?
-     * Réponse : DrivingViewModel est partagé entre Home et History.
-     * On le crée une fois et le passe aux deux écrans.
-     * Si on le créait dans NavGraph, on aurait un nouveau ViewModel
-     * à chaque navigation → perte de l'état !
-     */
-    val viewModel: DrivingViewModel = koinViewModel()
 
     /**
      * Items de la bottom navigation.
