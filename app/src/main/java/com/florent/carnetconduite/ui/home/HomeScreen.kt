@@ -81,10 +81,7 @@ import com.florent.carnetconduite.ui.home.screens.rememberReturnActiveScreenStat
 import com.florent.carnetconduite.ui.home.screens.rememberReturnReadyScreenState
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.koinViewModel
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.florent.carnetconduite.util.formatTimeRange
 
 /**
  * Écran principal Home - gère l'affichage selon l'état de conduite
@@ -582,18 +579,5 @@ private fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
 }
 
 private fun formatTripTime(trip: Trip): String {
-    val start = formatTime(trip.startTime)
-    val end = trip.endTime?.let { formatTime(it) } ?: "En cours"
-    return "$start → $end"
-}
-
-private fun formatTime(timestamp: Long): String {
-    return try {
-        val instant = Instant.ofEpochMilli(timestamp)
-        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
-    } catch (e: Exception) {
-        "N/A"
-    }
+    return formatTimeRange(trip.startTime, trip.endTime, ongoingLabel = "En cours")
 }
