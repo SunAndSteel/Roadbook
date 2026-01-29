@@ -17,11 +17,14 @@ import com.florent.carnetconduite.domain.usecases.StartReturnUseCase
 import com.florent.carnetconduite.domain.utils.Result
 import com.florent.carnetconduite.repository.TripRepository
 import com.florent.carnetconduite.ui.UiEvent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -73,8 +76,16 @@ class HomeViewModel(
             initialValue = null
         )
 
+    private val completionLatch = MutableStateFlow(false)
+
     val drivingState: StateFlow<DrivingState> = trips
-        .map { tripList -> computeStateUseCase(tripList) }
+        .combine(completionLatch) { tripList, latch ->
+            if (latch) {
+                DrivingState.COMPLETED
+            } else {
+                computeStateUseCase(tripList)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -102,6 +113,14 @@ class HomeViewModel(
 
     private suspend fun sendUiEvent(event: UiEvent) {
         _uiEvent.emit(event)
+    }
+
+    private fun triggerCompletionLatch() {
+        viewModelScope.launch {
+            completionLatch.value = true
+            delay(600)
+            completionLatch.value = false
+        }
     }
 
     fun startOutward(
@@ -186,6 +205,9 @@ class HomeViewModel(
                         "Trajet simple enregistré"
                     }
                     sendUiEvent(UiEvent.ShowToast(message))
+                    if (!prepareReturn) {
+                        triggerCompletionLatch()
+                    }
                 }
                 is Result.Error -> {
                     sendUiEvent(UiEvent.ShowError(result.message ?: "Une erreur est survenue"))
@@ -208,6 +230,7 @@ class HomeViewModel(
             when (val result = finishReturnUseCase(tripId, endKm, allowInconsistentKm = false)) {
                 is Result.Success -> {
                     sendUiEvent(UiEvent.ShowToast("Retour terminé"))
+                    triggerCompletionLatch()
                 }
                 is Result.Error -> {
                     if (result.exception is FinishOutwardUseCase.KmInconsistencyException) {

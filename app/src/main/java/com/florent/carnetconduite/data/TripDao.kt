@@ -67,6 +67,12 @@ interface TripDao {
     @Query("UPDATE trips SET startTime = :newStartTime WHERE id = :tripId")
     suspend fun updateStartTime(tripId: Long, newStartTime: Long)
 
+    @Query("UPDATE trips SET date = :newDate WHERE id = :tripId")
+    suspend fun updateDate(tripId: Long, newDate: String)
+
+    @Query("UPDATE trips SET conditions = :newConditions WHERE id = :tripId")
+    suspend fun updateConditions(tripId: Long, newConditions: String)
+
     /**
      * Marque un trajet aller comme "simple" sans créer de retour.
      * On réutilise pairedTripId pour indiquer une décision explicite.

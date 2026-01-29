@@ -15,6 +15,53 @@ class EditTripUseCase(
     private val logger: AppLogger
 ) {
     /**
+     * Modifie la date d'un trajet (format ISO-8601 attendu)
+     */
+    suspend fun editDate(tripId: Long, newDate: String): Result<Unit> =
+        Result.runCatchingSuspend {
+            logger.logOperationStart("EditDate: trip $tripId")
+
+            val trimmedDate = newDate.trim()
+            if (trimmedDate.isBlank()) {
+                throw IllegalArgumentException("La date ne peut pas être vide")
+            }
+
+            try {
+                java.time.LocalDate.parse(trimmedDate)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Format de date invalide (AAAA-MM-JJ)")
+            }
+
+            repository.updateDate(tripId, trimmedDate).getOrThrow()
+
+            logger.logOperationEnd("EditDate", true)
+            logger.log("Trip $tripId date updated")
+        }.onError { error ->
+            logger.logError("Failed to edit trip date", error)
+        }
+
+    /**
+     * Modifie les conditions météo d'un trajet
+     */
+    suspend fun editConditions(tripId: Long, newConditions: String): Result<Unit> =
+        Result.runCatchingSuspend {
+            logger.logOperationStart("EditConditions: trip $tripId")
+
+            val trimmedConditions = newConditions.trim()
+            val validation = validator.validateConditions(trimmedConditions)
+            if (validation.isInvalid()) {
+                throw IllegalArgumentException(validation.getErrorMessage() ?: "Conditions invalides")
+            }
+
+            repository.updateConditions(tripId, trimmedConditions).getOrThrow()
+
+            logger.logOperationEnd("EditConditions", true)
+            logger.log("Trip $tripId conditions updated")
+        }.onError { error ->
+            logger.logError("Failed to edit trip conditions", error)
+        }
+
+    /**
      * Modifie l'heure de départ d'un trajet
      */
     suspend fun editStartTime(tripId: Long, newStartTime: Long): Result<Unit> =

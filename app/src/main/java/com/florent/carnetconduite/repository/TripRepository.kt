@@ -163,4 +163,18 @@ class TripRepository(
     suspend fun updateStartTime(tripId: Long, newStartTime: Long): Result<Unit> = Result.runCatchingSuspend {
         tripDao.updateStartTime(tripId, newStartTime)
     }
+
+    /**
+     * Met à jour la date d'un trajet
+     */
+    suspend fun updateDate(tripId: Long, newDate: String): Result<Unit> = Result.runCatchingSuspend {
+        tripDao.updateDate(tripId, newDate)
+    }
+
+    /**
+     * Met à jour les conditions météo d'un trajet
+     */
+    suspend fun updateConditions(tripId: Long, newConditions: String): Result<Unit> = Result.runCatchingSuspend {
+        tripDao.updateConditions(tripId, newConditions)
+    }
 }
