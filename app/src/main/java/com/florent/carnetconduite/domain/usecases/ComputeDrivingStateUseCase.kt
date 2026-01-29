@@ -59,6 +59,9 @@ class ComputeDrivingStateUseCase {
             .maxByOrNull { it.id }
 
         if (latestOutward != null) {
+            if (latestOutward.pairedTripId == latestOutward.id) {
+                return null
+            }
             // Vérifier si un retour existe
             val hasReturn = trips.any {
                 it.pairedTripId == latestOutward.id && it.isReturn

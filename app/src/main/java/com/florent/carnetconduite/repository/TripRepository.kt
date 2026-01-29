@@ -95,6 +95,14 @@ class TripRepository(
     }
 
     /**
+     * Marque un trajet aller comme "simple" sans créer de retour.
+     */
+    suspend fun markOutwardAsSimple(tripId: Long): Result<Unit> = Result.runCatchingSuspend {
+        tripDao.markOutwardAsSimple(tripId)
+        SessionPreferences.clearOngoingSessionId(context)
+    }
+
+    /**
      * Démarre un trajet retour préparé
      */
     suspend fun startReturn(

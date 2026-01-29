@@ -269,7 +269,7 @@ fun ArrivedScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
                 // Trajet simple
                 ElevatedCard(
                     onClick = {
-                        viewModel.decideTripType(tripId = trip.id, prepareReturn = false)
+                        viewModel.confirmSimpleTrip(trip.id)
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
@@ -319,7 +319,7 @@ fun ArrivedScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
                 // Aller-retour
                 ElevatedCard(
                     onClick = {
-                        viewModel.decideTripType(tripId = trip.id, prepareReturn = true)
+                        viewModel.prepareReturnTrip(trip.id)
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
