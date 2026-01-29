@@ -2,6 +2,7 @@ package com.florent.carnetconduite.di
 
 import com.florent.carnetconduite.data.AppDatabase
 import com.florent.carnetconduite.domain.usecases.*
+import com.florent.carnetconduite.domain.utils.AndroidAppLogger
 import com.florent.carnetconduite.domain.utils.AppLogger
 import com.florent.carnetconduite.domain.validators.TripValidator
 import com.florent.carnetconduite.repository.SettingsRepository
@@ -9,7 +10,6 @@ import com.florent.carnetconduite.repository.TripRepository
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.history.HistoryViewModel
 import com.florent.carnetconduite.ui.settings.SettingsViewModel
-import com.florent.carnetconduite.ui.theme.ThemePreferences
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -33,23 +33,16 @@ val appModule = module {
         SettingsRepository(androidContext())
     }
 
-    single {
-        AppPreferences(androidContext())
-    }
-
     // ==================== REPOSITORY LAYER ====================
 
     single {
-        TripRepository(
-            tripDao = get(),
-            logger = get()
-        )
+        TripRepository(get(), androidContext())
     }
 
     // ==================== DOMAIN LAYER ====================
 
     // Utils
-    single { AppLogger }
+    single<AppLogger> { AndroidAppLogger() }
     single { TripValidator }
 
     // Use Cases
@@ -82,8 +75,31 @@ val appModule = module {
     }
 
     single {
+        FinishReturnUseCase(
+            repository = get(),
+            validator = get(),
+            logger = get()
+        )
+    }
+
+    single {
         DecideTripTypeUseCase(
             repository = get(),
+            logger = get()
+        )
+    }
+
+    single {
+        CancelReturnUseCase(
+            repository = get(),
+            logger = get()
+        )
+    }
+
+    single {
+        EditTripUseCase(
+            repository = get(),
+            validator = get(),
             logger = get()
         )
     }
@@ -102,12 +118,15 @@ val appModule = module {
      */
     viewModel {
         HomeViewModel(
-            computeDrivingStateUseCase = get(),
-            startOutwardUseCase = get(),
-            finishOutwardUseCase = get(),
-            startReturnUseCase = get(),
-            decideTripTypeUseCase = get(),
-            repository = get()
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
 
@@ -116,8 +135,8 @@ val appModule = module {
      */
     viewModel {
         HistoryViewModel(
-            repository = get(),
-            deleteTripGroupUseCase = get()
+            get(),
+            get()
         )
     }
 

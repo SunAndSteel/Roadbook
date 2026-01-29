@@ -17,7 +17,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun CompletedScreen(viewModel: HomeViewModel = koinViewModel()) {
     val tripGroups by viewModel.tripGroups.collectAsState()
-    val completedCount = tripGroups.count { it.isComplete }
+    val completedCount = tripGroups.count { group -> group.isComplete }
 
     Box(
         modifier = Modifier.fillMaxSize(),

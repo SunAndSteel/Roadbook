@@ -14,7 +14,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 

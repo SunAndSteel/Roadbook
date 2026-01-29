@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
-import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
