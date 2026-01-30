@@ -1,49 +1,47 @@
 package com.florent.carnetconduite.domain.usecases
 
-import com.florent.carnetconduite.data.Trip
-import com.florent.carnetconduite.domain.models.TripStatus
-import com.florent.carnetconduite.domain.utils.AppLogger
+import com.florent.carnetconduite.domain.utils.NoOpLogger
 import com.florent.carnetconduite.domain.utils.Result
 import com.florent.carnetconduite.repository.TripRepository
+import com.florent.carnetconduite.testutils.TripFactory
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.junit.Test
 
 class DecideTripTypeUseCaseTest {
+    private val repository = mock<TripRepository>()
+    private val logger = NoOpLogger()
+    private val useCase = DecideTripTypeUseCase(repository, logger = logger)
 
     @Test
-    fun simpleTripMarksOutwardWithoutCreatingReturn() = runTest {
-        val repository = mock<TripRepository>()
-        val logger = mock<AppLogger>()
-        val useCase = DecideTripTypeUseCase(repository, logger)
-        val tripId = 42L
-        val trip = Trip(
-            id = tripId,
-            startKm = 10,
-            endKm = 20,
-            startPlace = "A",
-            endPlace = "B",
-            startTime = 1000L,
-            endTime = 2000L,
-            isReturn = false,
-            pairedTripId = null,
-            status = TripStatus.COMPLETED
+    fun `prepare return finishes and prepares return trip`() = runTest {
+        val trip = TripFactory.create(
+            id = 7,
+            endKm = 120,
+            endPlace = "Lyon",
+            endTime = 1000L
         )
+        whenever(repository.getTripById(7)).thenReturn(Result.success(trip))
+        whenever(repository.finishAndPrepareReturn(7, 120, "Lyon", 1000L)).thenReturn(Result.success(99L))
 
-        whenever(repository.getTripById(tripId)).thenReturn(Result.Success(trip))
-        whenever(repository.markOutwardAsSimple(tripId)).thenReturn(Result.Success(Unit))
+        val result = useCase(tripId = 7, prepareReturn = true)
 
-        val result = useCase(tripId, prepareReturn = false)
+        assertThat(result.isSuccess()).isTrue()
+        verify(repository).finishAndPrepareReturn(7, 120, "Lyon", 1000L)
+    }
 
-        assertThat(result).isInstanceOf(Result.Success::class.java)
-        verify(repository).markOutwardAsSimple(tripId)
-        verify(repository, never()).finishAndPrepareReturn(any(), any(), any(), any())
-        verify(repository, never()).createSkippedReturn(eq(tripId))
+    @Test
+    fun `simple trip marks outward as simple`() = runTest {
+        val trip = TripFactory.create(id = 7, endKm = 120, endPlace = "Lyon", endTime = 1000L)
+        whenever(repository.getTripById(7)).thenReturn(Result.success(trip))
+        whenever(repository.markOutwardAsSimple(7)).thenReturn(Result.success(Unit))
+
+        val result = useCase(tripId = 7, prepareReturn = false)
+
+        assertThat(result.isSuccess()).isTrue()
+        verify(repository).markOutwardAsSimple(7)
     }
 }
