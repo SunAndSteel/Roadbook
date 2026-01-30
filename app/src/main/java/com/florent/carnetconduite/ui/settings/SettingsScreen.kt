@@ -1,19 +1,40 @@
 package com.florent.carnetconduite.ui.settings
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.UserSettings
+import com.florent.carnetconduite.ui.settings.components.SettingsItem
+import com.florent.carnetconduite.ui.settings.components.SettingsSectionHeader
+import com.florent.carnetconduite.ui.settings.components.SettingsSwitchItem
+import com.florent.carnetconduite.ui.settings.dialogs.GuideSelectionDialog
+import com.florent.carnetconduite.ui.settings.dialogs.ResetSettingsDialog
+import com.florent.carnetconduite.ui.settings.dialogs.ThemeSelectionDialog
 import com.florent.carnetconduite.ui.theme.ThemeMode
 
 /**
@@ -209,252 +230,14 @@ fun SettingsScreen(
      * Pour les actions destructives, toujours demander confirmation.
      */
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            icon = { Icon(Icons.Default.Warning, null) },
-            title = { Text("Réinitialiser les paramètres ?") },
-            text = { Text("Tous vos paramètres seront restaurés à leurs valeurs par défaut.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onResetToDefaults()
-                        showResetDialog = false
-                    }
-                ) {
-                    Text("Réinitialiser")
-                }
+        ResetSettingsDialog(
+            onConfirm = {
+                onResetToDefaults()
+                showResetDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text("Annuler")
-                }
-            }
+            onDismiss = { showResetDialog = false }
         )
     }
-}
-
-/**
- * Composable pour un item de setting cliquable.
- *
- * PATTERN : Composable réutilisable
- * Au lieu de dupliquer le code pour chaque setting, on crée un composable
- * générique qu'on configure avec des paramètres.
- *
- * AVANTAGES :
- * - DRY (Don't Repeat Yourself)
- * - Cohérence visuelle garantie
- * - Facile de changer le design de tous les items
- */
-@Composable
-private fun SettingsItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = tint
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-/**
- * Composable pour un item de setting avec Switch.
- */
-@Composable
-private fun SettingsSwitchItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
-}
-
-/**
- * Header de section dans les settings.
- */
-@Composable
-private fun SettingsSectionHeader(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    )
-}
-
-/**
- * Dialogue de sélection du thème.
- *
- * PATTERN : Dialogue avec options radio
- * Chaque option est cliquable entièrement (pas juste le bouton radio).
- */
-@Composable
-private fun ThemeSelectionDialog(
-    currentTheme: ThemeMode,
-    onThemeSelected: (ThemeMode) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Choisir le thème") },
-        text = {
-            Column {
-                ThemeMode.entries.forEach { mode ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onThemeSelected(mode) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = mode == currentTheme,
-                            onClick = { onThemeSelected(mode) }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column {
-                            Text(
-                                text = when (mode) {
-                                    ThemeMode.LIGHT -> "Clair"
-                                    ThemeMode.DARK -> "Sombre"
-                                    ThemeMode.DYNAMIC -> "Système"
-                                },
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = when (mode) {
-                                    ThemeMode.LIGHT -> "Toujours en mode clair"
-                                    ThemeMode.DARK -> "Toujours en mode sombre"
-                                    ThemeMode.DYNAMIC -> "Suit les paramètres du système"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Fermer")
-            }
-        }
-    )
-}
-
-/**
- * Dialogue de sélection du guide par défaut.
- */
-@Composable
-private fun GuideSelectionDialog(
-    currentGuide: String,
-    onGuideSelected: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Guide par défaut") },
-        text = {
-            Column {
-                listOf("1", "2").forEach { guide ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onGuideSelected(guide) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = guide == currentGuide,
-                            onClick = { onGuideSelected(guide) }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Guide $guide",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Fermer")
-            }
-        }
-    )
 }
 
 /**
