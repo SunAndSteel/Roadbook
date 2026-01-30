@@ -102,7 +102,7 @@ fun HomeScreen(
     val returnActiveState = rememberReturnActiveScreenState()
 
     val currentTripForAction = findTripForState(drivingState, trips)
-    val primaryAction = when (drivingState) {
+    val primaryAction: (@Composable () -> Unit)? = when (drivingState) {
         DrivingState.IDLE -> {
             {
                 PrimaryActionArea {
