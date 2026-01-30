@@ -1,21 +1,17 @@
 package com.florent.carnetconduite.ui.history
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.components.StatsHeader
 import com.florent.carnetconduite.ui.history.components.TripGroupCard
 import com.florent.carnetconduite.ui.history.dialogs.EditTripGroupDialog
-import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -29,7 +25,7 @@ fun HistoryScreen(
 ) {
     val tripGroups by viewModel.tripGroups.collectAsState(initial = emptyList())
     val tripStats by viewModel.tripStats.collectAsState()
-    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var selectedGroupForEdit by remember { mutableStateOf<TripGroup?>(null) }
 
@@ -38,10 +34,10 @@ fun HistoryScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    snackbarHostState.showSnackbar(message = event.message)
                 }
                 is UiEvent.ShowError -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                    snackbarHostState.showSnackbar(message = event.message)
                 }
                 is UiEvent.ShowConfirmDialog -> {
                     // Géré par les cards
@@ -50,50 +46,14 @@ fun HistoryScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Header avec statistiques
-        StatsHeader(
-            totalDistance = tripStats.totalKm,
-            totalDuration = (tripStats.totalHours * 3600000).toLong(), // hours → ms
-            tripCount = tripStats.totalTrips,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Liste des trajets
-        if (tripGroups.isEmpty()) {
-            // État vide
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                Text(
-                    text = "Aucun trajet dans l'historique",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(tripGroups) { group ->
-                    TripGroupCard(
-                        tripGroup = group,
-                        onEdit = {
-                            selectedGroupForEdit = group
-                        },
-                        onDelete = {
-                            viewModel.deleteTripGroup(group)
-                        }
-                    )
-                }
-            }
-        }
-    }
+    HistoryScreenContent(
+        modifier = modifier,
+        tripGroups = tripGroups,
+        tripStats = tripStats,
+        snackbarHostState = snackbarHostState,
+        onEdit = { selectedGroupForEdit = it },
+        onDelete = { viewModel.deleteTripGroup(it) }
+    )
 
     // Dialogue d'édition
     selectedGroupForEdit?.let { group ->
@@ -103,17 +63,87 @@ fun HistoryScreen(
                 selectedGroupForEdit = null
             },
             onEditStartTime = { trip, newTime ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editStartTime(trip.id, newTime)
             },
             onEditEndTime = { trip, newTime ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editEndTime(trip.id, newTime)
             },
             onEditStartKm = { trip, newKm ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editStartKm(trip.id, newKm)
             },
             onEditEndKm = { trip, newKm ->
-                // TODO: Implémenter avec EditTripUseCase
+                viewModel.editEndKm(trip.id, newKm)
+            },
+            onEditDate = { trip, newDate ->
+                viewModel.editDate(trip.id, newDate)
+            },
+            onEditConditions = { trip, newConditions ->
+                viewModel.editConditions(trip.id, newConditions)
             }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HistoryScreenContent(
+    modifier: Modifier = Modifier,
+    tripGroups: List<TripGroup>,
+    tripStats: TripStats,
+    snackbarHostState: SnackbarHostState,
+    onEdit: (TripGroup) -> Unit,
+    onDelete: (TripGroup) -> Unit
+) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            // Header avec statistiques
+            StatsHeader(
+                totalDistance = tripStats.totalKm,
+                totalDuration = (tripStats.totalHours * 3600000).toLong(), // hours → ms
+                tripCount = tripStats.totalTrips,
+                goalDistance = 1500,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Liste des trajets
+            if (tripGroups.isEmpty()) {
+                // État vide
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Text(
+                        text = "Aucun trajet dans l'historique",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(tripGroups) { group ->
+                        TripGroupCard(
+                            tripGroup = group,
+                            onEdit = { onEdit(group) },
+                            onDelete = { onDelete(group) }
+                        )
+                    }
+                }
+            }
+        }
     }
 }

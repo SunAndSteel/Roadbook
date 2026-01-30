@@ -95,6 +95,14 @@ class TripRepository(
     }
 
     /**
+     * Marque un trajet aller comme "simple" sans créer de retour.
+     */
+    suspend fun markOutwardAsSimple(tripId: Long): Result<Unit> = Result.runCatchingSuspend {
+        tripDao.markOutwardAsSimple(tripId)
+        SessionPreferences.clearOngoingSessionId(context)
+    }
+
+    /**
      * Démarre un trajet retour préparé
      */
     suspend fun startReturn(
@@ -154,5 +162,19 @@ class TripRepository(
      */
     suspend fun updateStartTime(tripId: Long, newStartTime: Long): Result<Unit> = Result.runCatchingSuspend {
         tripDao.updateStartTime(tripId, newStartTime)
+    }
+
+    /**
+     * Met à jour la date d'un trajet
+     */
+    suspend fun updateDate(tripId: Long, newDate: String): Result<Unit> = Result.runCatchingSuspend {
+        tripDao.updateDate(tripId, newDate)
+    }
+
+    /**
+     * Met à jour les conditions météo d'un trajet
+     */
+    suspend fun updateConditions(tripId: Long, newConditions: String): Result<Unit> = Result.runCatchingSuspend {
+        tripDao.updateConditions(tripId, newConditions)
     }
 }

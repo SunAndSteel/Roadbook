@@ -2,10 +2,11 @@ package com.florent.carnetconduite.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
-import com.florent.carnetconduite.domain.models.TripStatus
+import com.florent.carnetconduite.domain.models.groupTrips
 import com.florent.carnetconduite.domain.usecases.DeleteTripGroupUseCase
+import com.florent.carnetconduite.domain.usecases.EditTripUseCase
+import com.florent.carnetconduite.domain.utils.AppLogger
 import com.florent.carnetconduite.domain.utils.Result
 import com.florent.carnetconduite.repository.TripRepository
 import com.florent.carnetconduite.ui.UiEvent
@@ -17,14 +18,16 @@ import kotlinx.coroutines.launch
  */
 class HistoryViewModel(
     private val repository: TripRepository,
-    private val deleteTripGroupUseCase: DeleteTripGroupUseCase
+    private val deleteTripGroupUseCase: DeleteTripGroupUseCase,
+    private val editTripUseCase: EditTripUseCase,
+    private val logger: AppLogger
 ) : ViewModel() {
 
     /**
      * Flow des groupes de trajets (aller + retour)
      */
     val tripGroups: Flow<List<TripGroup>> = repository.allTrips
-        .map { trips -> groupTrips(trips) }
+        .map(::groupTrips)
 
 
     /**
@@ -51,29 +54,15 @@ class HistoryViewModel(
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
-    /**
-     * Groupe les trajets en aller-retour
-     */
-    private fun groupTrips(trips: List<Trip>): List<TripGroup> {
-        val completedTrips = trips.filter {
-            it.status == TripStatus.COMPLETED || it.status == TripStatus.SKIPPED
-        }
-
-        val outwardTrips = completedTrips.filter { !it.isReturn }
-        val groups = mutableListOf<TripGroup>()
-
-        outwardTrips.forEachIndexed { index, outward ->
-            val returnTrip = completedTrips.find { it.pairedTripId == outward.id && it.isReturn }
-            groups.add(
-                TripGroup(
-                    outward = outward,
-                    returnTrip = returnTrip,
-                    seanceNumber = index + 1
-                )
-            )
-        }
-
-        return groups.sortedByDescending { it.outward.startTime }
+    private suspend fun emitError(
+        operation: String,
+        exception: Exception,
+        message: String = "Une erreur est survenue. Réessaie.",
+        context: String? = null
+    ) {
+        val contextSuffix = context?.let { " ($it)" } ?: ""
+        logger.logError("HistoryViewModel:$operation failed$contextSuffix", exception)
+        _uiEvent.emit(UiEvent.ShowError(message))
     }
 
     /**
@@ -86,8 +75,115 @@ class HistoryViewModel(
                     _uiEvent.emit(UiEvent.ShowToast("Trajet supprimé"))
                 }
                 is Result.Error -> {
-                    _uiEvent.emit(UiEvent.ShowError(result.message))
+                    emitError(
+                        operation = "deleteTripGroup",
+                        exception = result.exception,
+                        context = "outwardTripId=${group.outward.id}"
+                    )
                 }
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Modifie l'heure de départ d'un trajet
+     */
+    fun editStartTime(tripId: Long, newStartTime: Long) {
+        viewModelScope.launch {
+            when (val result = editTripUseCase.editStartTime(tripId, newStartTime)) {
+                is Result.Success -> _uiEvent.emit(UiEvent.ShowToast("Heure modifiée"))
+                is Result.Error -> emitError(
+                    operation = "editStartTime",
+                    exception = result.exception,
+                    context = "tripId=$tripId"
+                )
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Modifie l'heure d'arrivée d'un trajet
+     */
+    fun editEndTime(tripId: Long, newEndTime: Long) {
+        viewModelScope.launch {
+            when (val result = editTripUseCase.editEndTime(tripId, newEndTime)) {
+                is Result.Success -> _uiEvent.emit(UiEvent.ShowToast("Heure modifiée"))
+                is Result.Error -> emitError(
+                    operation = "editEndTime",
+                    exception = result.exception,
+                    context = "tripId=$tripId"
+                )
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Modifie le kilométrage de départ d'un trajet
+     */
+    fun editStartKm(tripId: Long, newStartKm: Int) {
+        viewModelScope.launch {
+            when (val result = editTripUseCase.editStartKm(tripId, newStartKm)) {
+                is Result.Success -> _uiEvent.emit(UiEvent.ShowToast("Kilométrage modifié"))
+                is Result.Error -> emitError(
+                    operation = "editStartKm",
+                    exception = result.exception,
+                    context = "tripId=$tripId"
+                )
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Modifie le kilométrage d'arrivée d'un trajet
+     */
+    fun editEndKm(tripId: Long, newEndKm: Int) {
+        viewModelScope.launch {
+            when (val result = editTripUseCase.editEndKm(tripId, newEndKm)) {
+                is Result.Success -> _uiEvent.emit(UiEvent.ShowToast("Kilométrage modifié"))
+                is Result.Error -> emitError(
+                    operation = "editEndKm",
+                    exception = result.exception,
+                    context = "tripId=$tripId"
+                )
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Modifie la date d'un trajet
+     */
+    fun editDate(tripId: Long, newDate: String) {
+        viewModelScope.launch {
+            when (val result = editTripUseCase.editDate(tripId, newDate)) {
+                is Result.Success -> _uiEvent.emit(UiEvent.ShowToast("Date modifiée"))
+                is Result.Error -> emitError(
+                    operation = "editDate",
+                    exception = result.exception,
+                    context = "tripId=$tripId"
+                )
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Modifie les conditions météo d'un trajet
+     */
+    fun editConditions(tripId: Long, newConditions: String) {
+        viewModelScope.launch {
+            when (val result = editTripUseCase.editConditions(tripId, newConditions)) {
+                is Result.Success -> _uiEvent.emit(UiEvent.ShowToast("Conditions modifiées"))
+                is Result.Error -> emitError(
+                    operation = "editConditions",
+                    exception = result.exception,
+                    context = "tripId=$tripId"
+                )
+                is Result.Loading -> {}
             }
         }
     }

@@ -1,395 +1,309 @@
 package com.florent.carnetconduite.ui.home.screens
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.CompareArrows
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material.icons.rounded.TrendingUp
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
-import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
+import org.koin.androidx.compose.koinViewModel
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-import org.koin.androidx.compose.koinViewModel
-
-
 @Composable
 fun ArrivedScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
-    var showEditEndTime by remember { mutableStateOf(false) }
-    var showEditEndKm by remember { mutableStateOf(false) }
+    val state = rememberArrivedScreenState()
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        ArrivedScreenContent(trip = trip, state = state)
+        ArrivedScreenPrimaryAction(trip = trip, viewModel = viewModel)
+    }
+    ArrivedScreenDialogs(trip = trip, state = state, viewModel = viewModel)
+}
 
+@Stable
+class ArrivedScreenState {
+    var showEditEndTime by mutableStateOf(false)
+    var showEditEndKm by mutableStateOf(false)
+}
 
-    ElevatedCard(
+@Composable
+fun rememberArrivedScreenState(): ArrivedScreenState = remember { ArrivedScreenState() }
+
+@Composable
+fun ArrivedScreenContent(trip: Trip, state: ArrivedScreenState) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 4.dp
-        )
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // En-tête succès
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.onSecondary
-                        )
-                    }
-                }
-
-                Column {
-                    Text(
-                        text = "Arrivé à destination !",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = "Trajet terminé",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.alpha(0.7f)
-                    )
-                }
-            }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f)
-            )
-
-            // Trajet effectué
             Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.fillMaxWidth()
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier
+                    .height(88.dp)
+                    .fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Route,
+                        imageVector = Icons.Rounded.CheckCircle,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.height(52.dp)
                     )
-                    Column {
-                        Text(
-                            text = "${trip.startPlace} → ${trip.endPlace ?: ""}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Trajet aller",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.alpha(0.7f)
-                        )
-                    }
                 }
             }
-
-            // Détails du trajet (éditables)
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Récapitulatif",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-
-                // Kilométrage (éditable)
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = "${trip.endKm ?: 0} km",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
-                    supportingContent = {
-                        Text("Kilométrage d'arrivée")
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Speed,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showEditEndKm = true }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Edit,
-                                contentDescription = "Modifier",
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Heure d'arrivée (éditable)
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = trip.endTime?.let { formatTime(it) } ?: "N/A",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
-                    supportingContent = {
-                        Text("Heure d'arrivée")
-                    },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Schedule,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingContent = {
-                        IconButton(onClick = { showEditEndTime = true }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Edit,
-                                contentDescription = "Modifier",
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Distance parcourue (badge)
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.TrendingUp,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = "Distance parcourue",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Text(
-                            text = "${trip.nbKmsParcours} km",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f)
+            Text(
+                text = "Arrivée confirmée",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
+            Text(
+                text = "Bravo ! Le trajet aller est terminé.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
-            // Question
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Text(
-                    text = "Que veux-tu faire ?",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-
-                Text(
-                    text = "Prévois-tu un retour ou est-ce un trajet simple ?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.alpha(0.7f)
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.TrendingUp,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "${trip.nbKmsParcours} km",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Distance",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            // Options de décision
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer
             ) {
-                // Trajet simple
-                ElevatedCard(
-                    onClick = {
-                        viewModel.decideTripType(tripId = trip.id, prepareReturn = false)
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                    )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onTertiary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                        Text(
-                            text = "Trajet simple",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                        Text(
-                            text = "Terminer ici",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.alpha(0.7f)
-                        )
-                    }
-                }
-
-                // Aller-retour
-                ElevatedCard(
-                    onClick = {
-                        viewModel.decideTripType(tripId = trip.id, prepareReturn = true)
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    Icon(
+                        imageVector = Icons.Rounded.Timer,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.CompareArrows,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                        Text(
-                            text = "Aller-retour",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            text = "Préparer retour",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.alpha(0.7f)
-                        )
-                    }
+                    Text(
+                        text = formatDuration(trip.startTime, trip.endTime),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Durée",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
-    }
 
-    // Dialogs d'édition
-    if (showEditEndTime) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = "Souhaitez-vous effectuer un trajet retour ?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "Choisis l'option qui correspond à la suite du trajet.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        ListItem(
+            headlineContent = { Text("Modifier le kilométrage d'arrivée") },
+            supportingContent = { Text("${trip.endKm ?: 0} km") },
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Rounded.Speed,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            trailingContent = {
+                IconButton(onClick = { state.showEditEndKm = true }) {
+                    Icon(
+                        imageVector = Icons.Rounded.Edit,
+                        contentDescription = "Modifier"
+                    )
+                }
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        )
+
+        ListItem(
+            headlineContent = { Text("Modifier l'heure d'arrivée") },
+            supportingContent = { Text(trip.endTime?.let { formatTime(it) } ?: "N/A") },
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Rounded.Schedule,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+            },
+            trailingContent = {
+                IconButton(onClick = { state.showEditEndTime = true }) {
+                    Icon(
+                        imageVector = Icons.Rounded.Edit,
+                        contentDescription = "Modifier"
+                    )
+                }
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        )
+    }
+}
+
+@Composable
+fun ArrivedScreenPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        FilledTonalButton(
+            onClick = { viewModel.prepareReturnTrip(trip.id) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.CompareArrows,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Oui, préparer un retour",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        OutlinedButton(
+            onClick = { viewModel.confirmSimpleTrip(trip.id) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowForward,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Non, trajet simple",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun ArrivedScreenDialogs(
+    trip: Trip?,
+    state: ArrivedScreenState,
+    viewModel: HomeViewModel
+) {
+    if (trip == null) return
+    if (state.showEditEndTime) {
         TimePickerDialog(
             initialTime = trip.endTime ?: System.currentTimeMillis(),
-            onDismiss = { showEditEndTime = false },
+            onDismiss = { state.showEditEndTime = false },
             onConfirm = { newTime ->
                 viewModel.editEndTime(trip.id, newTime)
-                showEditEndTime = false
+                state.showEditEndTime = false
             }
         )
     }
 
-    if (showEditEndKm) {
+    if (state.showEditEndKm) {
         EditKmDialog(
             title = "Modifier km arrivée",
             initialKm = trip.endKm ?: 0,
-            onDismiss = { showEditEndKm = false },
+            onDismiss = { state.showEditEndKm = false },
             onConfirm = { newKm ->
                 viewModel.editEndKm(trip.id, newKm)
-                showEditEndKm = false
+                state.showEditEndKm = false
             }
         )
     }
@@ -403,5 +317,17 @@ private fun formatTime(timestamp: Long): String {
         formatter.format(instant)
     } catch (e: Exception) {
         "N/A"
+    }
+}
+
+private fun formatDuration(start: Long, end: Long?): String {
+    if (end == null || end <= start) return "—"
+    val duration = Duration.ofMillis(end - start)
+    val hours = duration.toHours()
+    val minutes = duration.minusHours(hours).toMinutes()
+    return if (hours > 0) {
+        String.format(Locale.FRENCH, "%dh%02d", hours, minutes)
+    } else {
+        String.format(Locale.FRENCH, "%d min", minutes)
     }
 }

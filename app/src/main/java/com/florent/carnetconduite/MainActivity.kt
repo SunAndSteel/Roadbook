@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -16,14 +14,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.florent.carnetconduite.domain.models.UserSettings
 import com.florent.carnetconduite.repository.SettingsRepository
-import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.navigation.NavGraph
 import com.florent.carnetconduite.ui.navigation.Screen
 import com.florent.carnetconduite.ui.theme.CarnetConduiteTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.koinViewModel
 
 /**
  * MainActivity : Point d'entrée de l'application.
@@ -182,7 +178,6 @@ class MainActivity : ComponentActivity() {
  *
  * STRUCTURE :
  * Scaffold (cadre Material 3)
- *   ├─ TopBar (avec bouton Settings)
  *   ├─ BottomBar (navigation Home/History)
  *   └─ Content (NavHost)
  *
@@ -204,74 +199,20 @@ fun RoadbookApp(
     val navController = rememberNavController()
 
     /**
-     * ViewModel principal de l'app.
-     *
-     * koinViewModel() = récupère depuis Koin
-     * Scope : Lié à cette Activity
-     *
-     * QUESTION : Pourquoi le ViewModel est ici et pas dans NavGraph ?
-     * Réponse : DrivingViewModel est partagé entre Home et History.
-     * On le crée une fois et le passe aux deux écrans.
-     * Si on le créait dans NavGraph, on aurait un nouveau ViewModel
-     * à chaque navigation → perte de l'état !
-     */
-    val viewModel: DrivingViewModel = koinViewModel()
-
-    /**
      * Items de la bottom navigation.
      *
-     * QUESTION : Pourquoi Settings n'est pas ici ?
-     * Réponse : Settings est moins utilisé que Home/History.
-     * Material Design recommande de le mettre dans la top bar
-     * ou un menu overflow, pas dans la navigation principale.
+     * NOTE : Settings est inclus dans la bottom bar
+     * pour rester accessible après la suppression de la top bar.
      */
     val navigationItems = listOf(
         Screen.Home,
-        Screen.History
+        Screen.History,
+        Screen.Settings
     )
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Roadbook") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                actions = {
-                    /**
-                     * NOUVEAU : Bouton Settings dans la top bar
-                     *
-                     * PATTERN : IconButton avec navigation
-                     *
-                     * FLUX :
-                     * 1. User clique sur l'icône Settings
-                     * 2. navController.navigate(Screen.Settings.route)
-                     * 3. NavHost détecte le changement
-                     * 4. Affiche SettingsScreenContainer
-                     * 5. SettingsViewModel est créé automatiquement par Koin
-                     * 6. Écran Settings s'affiche
-                     *
-                     * ANIMATION :
-                     * Compose Navigation gère automatiquement :
-                     * - Slide in from right (Settings entre)
-                     * - Slide out to left (Home sort)
-                     *
-                     * Personnalisable si besoin avec enterTransition/exitTransition.
-                     */
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Screen.Settings.route)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Paramètres"
-                        )
-                    }
-                }
-            )
-        },
         bottomBar = {
             /**
              * Bottom Navigation Bar
@@ -286,7 +227,6 @@ fun RoadbookApp(
                  * currentBackStackEntryAsState() = observe le changement de destination
                  * Quand on navigue, ce State change → recomposition → item sélectionné se met à jour
                  */
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
                 navigationItems.forEach { screen ->

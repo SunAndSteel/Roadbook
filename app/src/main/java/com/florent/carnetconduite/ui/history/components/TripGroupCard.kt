@@ -15,10 +15,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.TripGroup
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.florent.carnetconduite.util.formatDate
+import com.florent.carnetconduite.util.formatTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +33,8 @@ fun TripGroupCard(
     val totalDistance = (tripGroup.returnTrip?.endKm ?: tripGroup.outward.endKm ?: 0) -
             tripGroup.outward.startKm
     val hasReturn = tripGroup.returnTrip != null
+    val outwardGuide = tripGroup.outward.guide
+    val returnGuide = tripGroup.returnTrip?.guide
 
     ElevatedCard(
         onClick = { expanded = !expanded },
@@ -187,6 +187,60 @@ fun TripGroupCard(
                         labelColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 )
+
+                if (outwardGuide.isNotBlank() && outwardGuide != "1") {
+                    AssistChip(
+                        onClick = { },
+                        label = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Person,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "Guide n°$outwardGuide",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    )
+                }
+
+                if (returnGuide != null && returnGuide.isNotBlank() && returnGuide != "1" && returnGuide != outwardGuide) {
+                    AssistChip(
+                        onClick = { },
+                        label = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Person,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "Guide retour n°$returnGuide",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    )
+                }
             }
 
             // Conditions de conduite
@@ -229,7 +283,8 @@ fun TripGroupCard(
                         startKm = tripGroup.outward.startKm,
                         endKm = tripGroup.outward.endKm,
                         startTime = tripGroup.outward.startTime,
-                        endTime = tripGroup.outward.endTime
+                        endTime = tripGroup.outward.endTime,
+                        guide = tripGroup.outward.guide
                     )
 
                     // Trajet retour si présent
@@ -239,8 +294,35 @@ fun TripGroupCard(
                             startKm = returnTrip.startKm,
                             endKm = returnTrip.endKm,
                             startTime = returnTrip.startTime,
-                            endTime = returnTrip.endTime
+                            endTime = returnTrip.endTime,
+                            guide = returnTrip.guide
                         )
+
+                        if (returnTrip.conditions.isNotBlank()) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.CloudQueue,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = returnTrip.conditions,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -337,7 +419,8 @@ private fun TripDetailItem(
     startKm: Int,
     endKm: Int?,
     startTime: Long,
-    endTime: Long?
+    endTime: Long?,
+    guide: String?
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -419,25 +502,24 @@ private fun TripDetailItem(
                 }
             }
         }
-    }
-}
 
-private fun formatDate(dateString: String): String {
-    return try {
-        val parts = dateString.split("-")
-        "${parts[2]}/${parts[1]}/${parts[0]}"
-    } catch (e: Exception) {
-        dateString
-    }
-}
-
-private fun formatTime(timestamp: Long): String {
-    return try {
-        val instant = Instant.ofEpochMilli(timestamp)
-        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
-    } catch (e: Exception) {
-        "N/A"
+        if (!guide.isNullOrBlank() && guide != "1") {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Guide n°$guide",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }

@@ -38,9 +38,9 @@ class DecideTripTypeUseCase(
 
             logger.log("Return trip prepared for trip $tripId")
         } else {
-            // Marquer comme trajet simple
-            repository.createSkippedReturn(tripId).getOrThrow()
-            logger.log("Trip $tripId marked as simple (no return)")
+            // Marquer comme trajet simple sans créer de retour.
+            repository.markOutwardAsSimple(tripId).getOrThrow()
+            logger.log("Trip $tripId marked as simple (no return trip created)")
         }
 
         logger.logOperationEnd("DecideTripType", true)

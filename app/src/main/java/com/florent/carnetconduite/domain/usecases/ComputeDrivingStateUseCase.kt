@@ -17,12 +17,12 @@ class ComputeDrivingStateUseCase {
      */
     operator fun invoke(trips: List<Trip>): DrivingState {
         // Priorité 1 : Retour actif
-        if (trips.any { it.endKm == null && it.isReturn }) {
+        if (trips.any { it.endKm == null && it.isReturn && it.status == TripStatus.ACTIVE }) {
             return DrivingState.RETURN_ACTIVE
         }
 
         // Priorité 2 : Aller actif
-        if (trips.any { it.endKm == null && !it.isReturn }) {
+        if (trips.any { it.endKm == null && !it.isReturn && it.status == TripStatus.ACTIVE }) {
             return DrivingState.OUTWARD_ACTIVE
         }
 
@@ -59,6 +59,9 @@ class ComputeDrivingStateUseCase {
             .maxByOrNull { it.id }
 
         if (latestOutward != null) {
+            if (latestOutward.pairedTripId == latestOutward.id) {
+                return null
+            }
             // Vérifier si un retour existe
             val hasReturn = trips.any {
                 it.pairedTripId == latestOutward.id && it.isReturn

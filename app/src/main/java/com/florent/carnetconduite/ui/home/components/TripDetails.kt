@@ -14,10 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.florent.carnetconduite.util.formatTimeRange
 
 @Composable
 fun TripDetails(
@@ -299,23 +296,6 @@ fun TripDetails(
                 }
             }
         }
-    }
-}
-
-private fun formatTimeRange(startTime: Long, endTime: Long?): String {
-    val start = formatTime(startTime)
-    val end = endTime?.let { formatTime(it) } ?: "En cours..."
-    return "$start → $end"
-}
-
-private fun formatTime(timestamp: Long): String {
-    return try {
-        val instant = Instant.ofEpochMilli(timestamp)
-        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
-    } catch (e: Exception) {
-        "N/A"
     }
 }
 

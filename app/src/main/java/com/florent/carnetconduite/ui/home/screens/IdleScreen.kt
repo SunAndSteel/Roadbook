@@ -1,143 +1,170 @@
 package com.florent.carnetconduite.ui.home.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.rounded.CloudQueue
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.florent.carnetconduite.ui.DrivingViewModel
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IdleScreen(viewModel: HomeViewModel = koinViewModel()) {
-    var startKm by remember { mutableStateOf("") }
-    var startPlace by remember { mutableStateOf("") }
-    var conditions by remember { mutableStateOf("") }
-    var guide by remember { mutableStateOf("1") }
-    var expanded by remember { mutableStateOf(false) }
+    val state = rememberIdleScreenState()
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        IdleScreenContent(state = state)
+        IdleScreenPrimaryAction(state = state, viewModel = viewModel)
+    }
+}
 
-    ElevatedCard(
+@Stable
+class IdleScreenState {
+    var startKm by mutableStateOf("")
+    var startPlace by mutableStateOf("")
+    var conditions by mutableStateOf("")
+    var guide by mutableStateOf("1")
+    var guideExpanded by mutableStateOf(false)
+    var advancedExpanded by mutableStateOf(false)
+}
+
+@Composable
+fun rememberIdleScreenState(): IdleScreenState = remember { IdleScreenState() }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun IdleScreenContent(state: IdleScreenState) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 4.dp
-        ),
-
-
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // En-tête
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.DirectionsCar,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Préparer le départ",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "Renseigne les informations essentielles pour démarrer.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
-                Column {
-                    Text(
-                        text = "Nouveau trajet",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(
+                value = state.startKm,
+                onValueChange = { state.startKm = it },
+                label = { Text("Kilométrage départ") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Speed,
+                        contentDescription = null
                     )
-                    Text(
-                        text = "Prêt à démarrer",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.alpha(0.7f)
-                    )
-                }
-            }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
 
-            // Formulaire
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Kilométrage départ
-                OutlinedTextField(
-                    value = startKm,
-                    onValueChange = { startKm = it },
-                    label = { Text("Kilométrage départ") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Speed,
-                            contentDescription = null
-                        )
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            OutlinedTextField(
+                value = state.startPlace,
+                onValueChange = { state.startPlace = it },
+                label = { Text("Lieu de départ") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.LocationOn,
+                        contentDescription = null
                     )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 )
+            )
+        }
 
-                // Lieu de départ
-                OutlinedTextField(
-                    value = startPlace,
-                    onValueChange = { startPlace = it },
-                    label = { Text("Lieu de départ") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = null
-                        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        AssistChip(
+            onClick = { state.advancedExpanded = !state.advancedExpanded },
+            label = {
+                Text(
+                    text = if (state.advancedExpanded) "Masquer les options" else "Options complémentaires",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = if (state.advancedExpanded) {
+                        Icons.Rounded.KeyboardArrowUp
+                    } else {
+                        Icons.Rounded.KeyboardArrowDown
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                    )
+                    contentDescription = null
                 )
+            },
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                leadingIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        )
 
-                // Guide (dropdown)
+        AnimatedVisibility(visible = state.advancedExpanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
+                    expanded = state.guideExpanded,
+                    onExpandedChange = { state.guideExpanded = !state.guideExpanded }
                 ) {
                     OutlinedTextField(
-                        value = "Guide $guide",
+                        value = "Guide ${state.guide}",
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Accompagnateur") },
@@ -148,7 +175,7 @@ fun IdleScreen(viewModel: HomeViewModel = koinViewModel()) {
                             )
                         },
                         trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                            ExposedDropdownMenuDefaults.TrailingIcon(state.guideExpanded)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -160,37 +187,34 @@ fun IdleScreen(viewModel: HomeViewModel = koinViewModel()) {
                         )
                     )
                     ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = state.guideExpanded,
+                        onDismissRequest = { state.guideExpanded = false }
                     ) {
                         listOf("1", "2").forEach { id ->
                             DropdownMenuItem(
                                 text = {
                                     Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Rounded.Person,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
+                                            contentDescription = null
                                         )
                                         Text("Guide $id")
                                     }
                                 },
                                 onClick = {
-                                    guide = id
-                                    expanded = false
+                                    state.guide = id
+                                    state.guideExpanded = false
                                 }
                             )
                         }
                     }
                 }
 
-                // Conditions (optionnel)
                 OutlinedTextField(
-                    value = conditions,
-                    onValueChange = { conditions = it },
+                    value = state.conditions,
+                    onValueChange = { state.conditions = it },
                     label = { Text("Conditions météo (optionnel)") },
                     leadingIcon = {
                         Icon(
@@ -207,37 +231,38 @@ fun IdleScreen(viewModel: HomeViewModel = koinViewModel()) {
                     )
                 )
             }
-
-            // Bouton démarrer
-            Button(
-                onClick = {
-                    viewModel.startOutward(
-                        startKm = startKm.toIntOrNull() ?: 0,
-                        startPlace = startPlace,
-                        conditions = conditions,
-                        guide = guide
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Démarrer le trajet",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
+    }
+}
+
+@Composable
+fun IdleScreenPrimaryAction(
+    state: IdleScreenState,
+    viewModel: HomeViewModel
+) {
+    FilledTonalButton(
+        onClick = {
+            viewModel.startOutward(
+                startKm = state.startKm.toIntOrNull() ?: 0,
+                startPlace = state.startPlace,
+                conditions = state.conditions,
+                guide = state.guide
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.PlayArrow,
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "Démarrer le trajet",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
