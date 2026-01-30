@@ -35,17 +35,14 @@ import kotlinx.coroutines.flow.map
  * - ViewModel = adaptateur pour l'UI (StateFlow)
  * - Séparation des responsabilités !
  */
-class SettingsRepository(private val context: Context) {
+private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "user_settings"
+)
 
-    /**
-     * Extension property pour créer le DataStore.
-     *
-     * PATTERN : Lazy initialization
-     * Le DataStore n'est créé qu'au premier accès.
-     */
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-        name = "user_settings"
-    )
+class SettingsRepository(
+    private val context: Context,
+    private val dataStore: DataStore<Preferences> = context.settingsDataStore
+) {
 
     /**
      * Clés pour les préférences dans DataStore.
@@ -75,7 +72,7 @@ class SettingsRepository(private val context: Context) {
      * Réponse : Deux lectures de DataStore (c'est un cold flow!)
      * C'est pourquoi le ViewModel le convertira en StateFlow (hot).
      */
-    val userSettings: Flow<UserSettings> = context.dataStore.data
+    val userSettings: Flow<UserSettings> = dataStore.data
         .map { preferences ->
             // Transformation : Preferences (clé-valeur) -> UserSettings (modèle typé)
             UserSettings(
@@ -110,7 +107,7 @@ class SettingsRepository(private val context: Context) {
      * Tout ça sans code supplémentaire ! C'est la puissance des Flows.
      */
     suspend fun updateThemeMode(themeMode: ThemeMode) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[THEME_MODE_KEY] = themeMode.name
         }
     }
@@ -128,7 +125,7 @@ class SettingsRepository(private val context: Context) {
         require(guide in listOf("1", "2")) {
             "Guide doit être 1 ou 2"
         }
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[DEFAULT_GUIDE_KEY] = guide
         }
     }
@@ -137,7 +134,7 @@ class SettingsRepository(private val context: Context) {
      * Met à jour l'option de confirmation de suppression.
      */
     suspend fun updateShowDeleteConfirmations(show: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[SHOW_DELETE_CONFIRMATIONS_KEY] = show
         }
     }
@@ -146,7 +143,7 @@ class SettingsRepository(private val context: Context) {
      * Met à jour le format de date.
      */
     suspend fun updateDateFormat(format: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[DATE_FORMAT_KEY] = format
         }
     }
@@ -159,7 +156,7 @@ class SettingsRepository(private val context: Context) {
      * donc soit tout réussit, soit rien ne change.
      */
     suspend fun resetToDefaults() {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences.clear()
             // DataStore émettra les valeurs par défaut via le map ci-dessus
         }

@@ -112,6 +112,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.assertj.core)
     testImplementation(libs.androidx.room.testing)

@@ -1,9 +1,9 @@
 package com.florent.carnetconduite.repository
 
 import android.content.Context
-import com.florent.carnetconduite.data.SessionPreferences
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.data.TripDao
+import com.florent.carnetconduite.data.SessionPreferences
 import com.florent.carnetconduite.domain.utils.Result
 import kotlinx.coroutines.flow.Flow
 
@@ -13,12 +13,13 @@ import kotlinx.coroutines.flow.Flow
  */
 class TripRepository(
     private val tripDao: TripDao,
-    private val context: Context
+    private val context: Context,
+    private val sessionStorage: SessionStorage = SessionPreferencesStorage
 ) {
     // Flows - pas besoin de wrapper car ils gèrent déjà les erreurs via le flow
     val allTrips: Flow<List<Trip>> = tripDao.getAllTrips()
     val activeTrip: Flow<Trip?> = tripDao.getActiveTrip()
-    val ongoingSessionId: Flow<Long?> = SessionPreferences.getOngoingSessionId(context)
+    val ongoingSessionId: Flow<Long?> = sessionStorage.getOngoingSessionId(context)
 
     /**
      * Insère un nouveau trajet
@@ -66,7 +67,7 @@ class TripRepository(
         endTime: Long
     ): Result<Unit> = Result.runCatchingSuspend {
         tripDao.finishTrip(tripId, endKm, endPlace, endTime)
-        SessionPreferences.clearOngoingSessionId(context)
+        sessionStorage.clearOngoingSessionId(context)
     }
 
     /**
@@ -80,7 +81,7 @@ class TripRepository(
         endTime: Long
     ): Result<Long> = Result.runCatchingSuspend {
         val returnId = tripDao.finishAndPrepareReturn(tripId, endKm, endPlace, endTime)
-        SessionPreferences.saveOngoingSessionId(context, returnId)
+        sessionStorage.saveOngoingSessionId(context, returnId)
         returnId
     }
 
@@ -90,7 +91,7 @@ class TripRepository(
      */
     suspend fun createSkippedReturn(tripId: Long): Result<Long> = Result.runCatchingSuspend {
         val skippedId = tripDao.createSkippedReturn(tripId)
-        SessionPreferences.clearOngoingSessionId(context)
+        sessionStorage.clearOngoingSessionId(context)
         skippedId
     }
 
@@ -99,7 +100,7 @@ class TripRepository(
      */
     suspend fun markOutwardAsSimple(tripId: Long): Result<Unit> = Result.runCatchingSuspend {
         tripDao.markOutwardAsSimple(tripId)
-        SessionPreferences.clearOngoingSessionId(context)
+        sessionStorage.clearOngoingSessionId(context)
     }
 
     /**
@@ -111,7 +112,7 @@ class TripRepository(
         startTime: Long
     ): Result<Unit> = Result.runCatchingSuspend {
         tripDao.startReturn(returnTripId, actualStartKm, startTime)
-        SessionPreferences.saveOngoingSessionId(context, returnTripId)
+        sessionStorage.saveOngoingSessionId(context, returnTripId)
     }
 
     /**
@@ -119,21 +120,21 @@ class TripRepository(
      */
     suspend fun cancelReturn(returnTripId: Long): Result<Unit> = Result.runCatchingSuspend {
         tripDao.cancelTrip(returnTripId)
-        SessionPreferences.clearOngoingSessionId(context)
+        sessionStorage.clearOngoingSessionId(context)
     }
 
     /**
      * Sauvegarde l'ID de session en cours
      */
     suspend fun saveOngoingSessionId(sessionId: Long): Result<Unit> = Result.runCatchingSuspend {
-        SessionPreferences.saveOngoingSessionId(context, sessionId)
+        sessionStorage.saveOngoingSessionId(context, sessionId)
     }
 
     /**
      * Efface l'ID de session en cours
      */
     suspend fun clearOngoingSessionId(): Result<Unit> = Result.runCatchingSuspend {
-        SessionPreferences.clearOngoingSessionId(context)
+        sessionStorage.clearOngoingSessionId(context)
     }
 
     /**
@@ -176,5 +177,24 @@ class TripRepository(
      */
     suspend fun updateConditions(tripId: Long, newConditions: String): Result<Unit> = Result.runCatchingSuspend {
         tripDao.updateConditions(tripId, newConditions)
+    }
+}
+
+interface SessionStorage {
+    fun getOngoingSessionId(context: Context): Flow<Long?>
+    suspend fun saveOngoingSessionId(context: Context, sessionId: Long)
+    suspend fun clearOngoingSessionId(context: Context)
+}
+
+object SessionPreferencesStorage : SessionStorage {
+    override fun getOngoingSessionId(context: Context): Flow<Long?> =
+        SessionPreferences.getOngoingSessionId(context)
+
+    override suspend fun saveOngoingSessionId(context: Context, sessionId: Long) {
+        SessionPreferences.saveOngoingSessionId(context, sessionId)
+    }
+
+    override suspend fun clearOngoingSessionId(context: Context) {
+        SessionPreferences.clearOngoingSessionId(context)
     }
 }
