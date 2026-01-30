@@ -9,6 +9,7 @@ import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenContent
+import com.florent.carnetconduite.ui.home.screens.ArrivedStatsSection
 import com.florent.carnetconduite.ui.home.screens.CompletedScreenContent
 import com.florent.carnetconduite.ui.home.screens.CompletedScreenPrimaryAction
 import com.florent.carnetconduite.ui.home.screens.IdleScreenContent
@@ -19,24 +20,11 @@ import com.florent.carnetconduite.ui.home.screens.ReturnActiveScreenContent
 import com.florent.carnetconduite.ui.home.screens.ReturnActiveScreenState
 import com.florent.carnetconduite.ui.home.screens.ReturnReadyScreenContent
 import com.florent.carnetconduite.ui.home.screens.ReturnReadyScreenState
-import com.florent.carnetconduite.ui.home.screens.rememberArrivedScreenState
 import com.florent.carnetconduite.ui.preview.DevicePreview
 import com.florent.carnetconduite.ui.preview.RoadbookTheme
 
 private const val PreviewStartTime = 1704445200000L
 private const val PreviewEndTime = PreviewStartTime + 45 * 60 * 1000L
-
-private val previewOutwardActiveTrip = Trip(
-    id = 1L,
-    startKm = 12500,
-    startPlace = "Bordeaux - Centre",
-    startTime = PreviewStartTime,
-    isReturn = false,
-    status = TripStatus.ACTIVE,
-    conditions = "Soleil",
-    guide = "1",
-    date = "2024-01-05"
-)
 
 private val previewArrivedTrip = Trip(
     id = 2L,
@@ -136,7 +124,7 @@ fun HomeScreenOutwardActivePreview() {
                 endPlace = "Pessac"
             }
         }
-        OutwardActiveScreenContent(trip = previewOutwardActiveTrip, state = state)
+        OutwardActiveScreenContent(state = state)
     }
 }
 
@@ -144,8 +132,10 @@ fun HomeScreenOutwardActivePreview() {
 @Composable
 fun HomeScreenArrivedPreview() {
     RoadbookTheme {
-        val state = rememberArrivedScreenState()
-        ArrivedScreenContent(trip = previewArrivedTrip, state = state)
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            ArrivedScreenContent()
+            ArrivedStatsSection(trip = previewArrivedTrip, onEditDistance = null)
+        }
     }
 }
 
@@ -171,7 +161,7 @@ fun HomeScreenReturnActivePreview() {
                 endKm = "12810"
             }
         }
-        ReturnActiveScreenContent(trip = previewReturnActiveTrip, state = state)
+        ReturnActiveScreenContent(state = state)
     }
 }
 

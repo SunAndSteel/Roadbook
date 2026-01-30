@@ -40,86 +40,100 @@ internal fun TripHeader(
     statusColor: Color,
     containerColor: Color,
     onContainerColor: Color,
-    showActiveIndicator: Boolean
+    showActiveIndicator: Boolean,
+    action: (@Composable () -> Unit)? = null
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = MaterialTheme.shapes.large,
-                    color = statusColor,
-                    modifier = Modifier
-                        .height(56.dp)
-                        .width(56.dp)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
+                    Surface(
+                        shape = MaterialTheme.shapes.large,
+                        color = statusColor,
+                        modifier = Modifier
+                            .height(56.dp)
+                            .width(56.dp)
                     ) {
-                        Icon(
-                            imageVector = header.icon,
-                            contentDescription = null,
-                            tint = contentColorFor(statusColor),
-                            modifier = Modifier.padding(12.dp)
-                        )
-                    }
-                }
-                Column {
-                    Text(
-                        text = header.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = onContainerColor
-                    )
-                    Text(
-                        text = header.subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = onContainerColor,
-                        modifier = Modifier.alpha(0.7f)
-                    )
-                }
-            }
-
-            AssistChip(
-                onClick = {},
-                label = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        if (showActiveIndicator) {
-                            PulsingDot(
-                                color = statusColor,
-                                modifier = Modifier
-                                    .height(8.dp)
-                                    .width(8.dp)
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = header.icon,
+                                contentDescription = null,
+                                tint = contentColorFor(statusColor),
+                                modifier = Modifier.padding(12.dp)
                             )
                         }
+                    }
+                    Column {
                         Text(
-                            text = header.statusLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
+                            text = header.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = onContainerColor
+                        )
+                        Text(
+                            text = header.subtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = onContainerColor,
+                            modifier = Modifier.alpha(0.7f)
                         )
                     }
-                },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = statusColor.copy(alpha = 0.15f),
-                    labelColor = statusColor
+                }
+
+                AssistChip(
+                    onClick = {},
+                    label = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (showActiveIndicator) {
+                                PulsingDot(
+                                    color = statusColor,
+                                    modifier = Modifier
+                                        .height(8.dp)
+                                        .width(8.dp)
+                                )
+                            }
+                            Text(
+                                text = header.statusLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = statusColor.copy(alpha = 0.15f),
+                        labelColor = statusColor
+                    )
                 )
-            )
+            }
+
+            action?.let { slot ->
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    slot()
+                }
+            }
         }
     }
 }

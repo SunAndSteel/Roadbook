@@ -28,12 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.ui.UiEvent
+import com.florent.carnetconduite.ui.home.components.HomeTripScaffold
 import com.florent.carnetconduite.ui.home.components.PrimaryActionArea
 import com.florent.carnetconduite.ui.home.components.TripHeader
-import com.florent.carnetconduite.ui.home.components.TripSummary
+import com.florent.carnetconduite.ui.home.components.TripSummaryHeader
+import com.florent.carnetconduite.ui.home.components.TripSummaryVariant
 import com.florent.carnetconduite.ui.home.mapper.colorsForState
 import com.florent.carnetconduite.ui.home.mapper.findTripForState
 import com.florent.carnetconduite.ui.home.mapper.headerForState
+import com.florent.carnetconduite.ui.home.screens.ArrivedStatsSection
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenContent
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenDialogs
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenPrimaryAction
@@ -58,7 +61,8 @@ import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * Écran principal Home - gère l'affichage selon l'état de conduite
+ * Écran principal Home - gère l'affichage selon l'état de conduite.
+ * Sections respect the UI contract order: top status, summary header, body, optional stats.
  */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -117,117 +121,187 @@ fun HomeScreen(
                 val currentTrip = findTripForState(state, trips)
                 val header = headerForState(state)
                 val colors = colorsForState(state)
+                val summaryStatusLabel = if (state == DrivingState.ARRIVED) {
+                    "Terminé"
+                } else {
+                    header.statusLabel
+                }
 
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    TripHeader(
-                        header = header,
-                        statusColor = colors.statusColor,
-                        containerColor = colors.headerContainer,
-                        onContainerColor = colors.onHeaderContainer,
-                        showActiveIndicator = state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE
-                    )
-                    TripSummary(
-                        trip = currentTrip,
-                        stateLabel = header.subtitle,
-                        accentColor = colors.statusColor,
-                        showIdleSetup = state == DrivingState.IDLE,
-                        idleState = idleState
-                    )
-
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp),
-                        colors = CardDefaults.elevatedCardColors(
-                            containerColor = colors.cardContainer
-                        ),
-                        elevation = CardDefaults.elevatedCardElevation(
-                            defaultElevation = 6.dp
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            when (state) {
+                HomeTripScaffold(
+                    topStatus = {
+                        TripHeader(
+                            header = header,
+                            statusColor = colors.statusColor,
+                            containerColor = colors.headerContainer,
+                            onContainerColor = colors.onHeaderContainer,
+                            showActiveIndicator = state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE,
+                            action = when (state) {
                                 DrivingState.IDLE -> {
-                                    IdleScreenContent(state = idleState)
-                                }
-                                DrivingState.OUTWARD_ACTIVE -> {
-                                    currentTrip?.let {
-                                        OutwardActiveScreenContent(trip = it, state = outwardState)
+                                    {
+                                        PrimaryActionArea {
+                                            IdleScreenPrimaryAction(state = idleState, viewModel = viewModel)
+                                        }
                                     }
                                 }
-                                DrivingState.ARRIVED -> {
-                                    currentTrip?.let {
-                                        ArrivedScreenContent(trip = it, state = arrivedState)
+                                DrivingState.OUTWARD_ACTIVE -> {
+                                    currentTrip?.let { trip ->
+                                        {
+                                            PrimaryActionArea {
+                                                OutwardActiveScreenPrimaryAction(
+                                                    trip = trip,
+                                                    state = outwardState,
+                                                    viewModel = viewModel
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                                 DrivingState.RETURN_READY -> {
-                                    currentTrip?.let {
-                                        ReturnReadyScreenContent(trip = it, state = returnReadyState)
+                                    currentTrip?.let { trip ->
+                                        {
+                                            PrimaryActionArea {
+                                                ReturnReadyScreenPrimaryAction(
+                                                    trip = trip,
+                                                    state = returnReadyState,
+                                                    viewModel = viewModel
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                                 DrivingState.RETURN_ACTIVE -> {
-                                    currentTrip?.let {
-                                        ReturnActiveScreenContent(trip = it, state = returnActiveState)
+                                    currentTrip?.let { trip ->
+                                        {
+                                            PrimaryActionArea {
+                                                ReturnActiveScreenPrimaryAction(
+                                                    trip = trip,
+                                                    state = returnActiveState,
+                                                    viewModel = viewModel
+                                                )
+                                            }
+                                        }
                                     }
                                 }
-                                DrivingState.COMPLETED -> {
-                                    CompletedScreenContent(viewModel = viewModel)
-                                }
+                                else -> null
                             }
-                        }
-                    }
-
-                    PrimaryActionArea {
+                        )
+                    },
+                    summary = currentTrip?.let { trip ->
                         when (state) {
-                            DrivingState.IDLE -> {
-                                IdleScreenPrimaryAction(state = idleState, viewModel = viewModel)
-                            }
-                            DrivingState.OUTWARD_ACTIVE -> {
-                                currentTrip?.let {
-                                    OutwardActiveScreenPrimaryAction(
-                                        trip = it,
-                                        state = outwardState,
-                                        viewModel = viewModel
+                            DrivingState.IDLE,
+                            DrivingState.COMPLETED -> null
+                            else -> {
+                                {
+                                    TripSummaryHeader(
+                                        trip = trip,
+                                        variant = when (state) {
+                                            DrivingState.ARRIVED -> TripSummaryVariant.Minimal
+                                            DrivingState.RETURN_READY -> TripSummaryVariant.Compact
+                                            else -> TripSummaryVariant.Expanded
+                                        },
+                                        statusLabel = summaryStatusLabel,
+                                        accentColor = colors.statusColor,
+                                        showDistance = state != DrivingState.ARRIVED,
+                                        onEditStartTime = when (state) {
+                                            DrivingState.OUTWARD_ACTIVE -> {
+                                                { outwardState.showEditStartTime = true }
+                                            }
+                                            DrivingState.RETURN_ACTIVE -> {
+                                                { returnActiveState.showEditStartTime = true }
+                                            }
+                                            else -> null
+                                        },
+                                        onEditEndTime = when (state) {
+                                            DrivingState.OUTWARD_ACTIVE -> {
+                                                { outwardState.showEditEndTime = true }
+                                            }
+                                            DrivingState.RETURN_ACTIVE -> {
+                                                { returnActiveState.showEditEndTime = true }
+                                            }
+                                            DrivingState.ARRIVED -> {
+                                                { arrivedState.showEditEndTime = true }
+                                            }
+                                            else -> null
+                                        },
+                                        prioritizeEndTime = state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE,
+                                        onEditDistance = null
                                     )
                                 }
-                            }
-                            DrivingState.ARRIVED -> {
-                                currentTrip?.let {
-                                    ArrivedScreenPrimaryAction(
-                                        trip = it,
-                                        viewModel = viewModel
-                                    )
-                                }
-                            }
-                            DrivingState.RETURN_READY -> {
-                                currentTrip?.let {
-                                    ReturnReadyScreenPrimaryAction(
-                                        trip = it,
-                                        state = returnReadyState,
-                                        viewModel = viewModel
-                                    )
-                                }
-                            }
-                            DrivingState.RETURN_ACTIVE -> {
-                                currentTrip?.let {
-                                    ReturnActiveScreenPrimaryAction(
-                                        trip = it,
-                                        state = returnActiveState,
-                                        viewModel = viewModel
-                                    )
-                                }
-                            }
-                            DrivingState.COMPLETED -> {
-                                CompletedScreenPrimaryAction()
                             }
                         }
+                    },
+                    body = {
+                        ElevatedCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = colors.cardContainer
+                            ),
+                            elevation = CardDefaults.elevatedCardElevation(
+                                defaultElevation = 6.dp
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                when (state) {
+                                    DrivingState.IDLE -> {
+                                        IdleScreenContent(state = idleState)
+                                    }
+                                    DrivingState.OUTWARD_ACTIVE -> {
+                                        currentTrip?.let {
+                                            OutwardActiveScreenContent(state = outwardState)
+                                        }
+                                    }
+                                    DrivingState.ARRIVED -> {
+                                        currentTrip?.let {
+                                            ArrivedScreenContent()
+                                            PrimaryActionArea {
+                                                ArrivedScreenPrimaryAction(
+                                                    trip = it,
+                                                    viewModel = viewModel
+                                                )
+                                            }
+                                        }
+                                    }
+                                    DrivingState.RETURN_READY -> {
+                                        currentTrip?.let {
+                                            ReturnReadyScreenContent(trip = it, state = returnReadyState)
+                                        }
+                                    }
+                                    DrivingState.RETURN_ACTIVE -> {
+                                        currentTrip?.let {
+                                            ReturnActiveScreenContent(state = returnActiveState)
+                                        }
+                                    }
+                                    DrivingState.COMPLETED -> {
+                                        CompletedScreenContent(viewModel = viewModel)
+                                        PrimaryActionArea {
+                                            CompletedScreenPrimaryAction()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    stats = currentTrip?.let { trip ->
+                        when (state) {
+                            DrivingState.ARRIVED -> {
+                                {
+                                    ArrivedStatsSection(
+                                        trip = trip,
+                                        onEditDistance = { arrivedState.showEditEndKm = true }
+                                    )
+                                }
+                            }
+                            else -> null
+                        }
                     }
-                }
+                )
             }
 
             OutwardActiveScreenDialogs(trip = findTripForState(DrivingState.OUTWARD_ACTIVE, trips), state = outwardState, viewModel = viewModel)

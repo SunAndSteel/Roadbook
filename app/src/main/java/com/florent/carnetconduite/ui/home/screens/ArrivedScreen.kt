@@ -15,16 +15,12 @@ import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.CompareArrows
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.TrendingUp
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -45,16 +41,13 @@ import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 import org.koin.androidx.compose.koinViewModel
 import java.time.Duration
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
 fun ArrivedScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
     val state = rememberArrivedScreenState()
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ArrivedScreenContent(trip = trip, state = state)
+        ArrivedScreenContent()
         ArrivedScreenPrimaryAction(trip = trip, viewModel = viewModel)
     }
     ArrivedScreenDialogs(trip = trip, state = state, viewModel = viewModel)
@@ -70,7 +63,7 @@ class ArrivedScreenState {
 fun rememberArrivedScreenState(): ArrivedScreenState = remember { ArrivedScreenState() }
 
 @Composable
-fun ArrivedScreenContent(trip: Trip, state: ArrivedScreenState) {
+fun ArrivedScreenContent() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,74 +95,15 @@ fun ArrivedScreenContent(trip: Trip, state: ArrivedScreenState) {
                 }
             }
             Text(
-                text = "Arrivée confirmée",
+                text = "Bravo !",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Bravo ! Le trajet aller est terminé.",
+                text = "Le trajet aller est terminé.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.TrendingUp,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "${trip.nbKmsParcours} km",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Distance",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Timer,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                    Text(
-                        text = formatDuration(trip.startTime, trip.endTime),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Durée",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -186,52 +120,89 @@ fun ArrivedScreenContent(trip: Trip, state: ArrivedScreenState) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
 
-        ListItem(
-            headlineContent = { Text("Modifier le kilométrage d'arrivée") },
-            supportingContent = { Text("${trip.endKm ?: 0} km") },
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Rounded.Speed,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            trailingContent = {
-                IconButton(onClick = { state.showEditEndKm = true }) {
+/**
+ * StatsSection for the arrived state; owns distance + duration to avoid duplication
+ * with the summary header.
+ */
+@Composable
+fun ArrivedStatsSection(
+    trip: Trip,
+    onEditDistance: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Surface(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        imageVector = Icons.Rounded.Edit,
-                        contentDescription = "Modifier"
+                        imageVector = Icons.Rounded.TrendingUp,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
+                    onEditDistance?.let {
+                        IconButton(onClick = it) {
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = "Modifier la distance"
+                            )
+                        }
+                    }
                 }
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        )
+                Text(
+                    text = "${trip.nbKmsParcours} km",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Distance",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
-        ListItem(
-            headlineContent = { Text("Modifier l'heure d'arrivée") },
-            supportingContent = { Text(trip.endTime?.let { formatTime(it) } ?: "N/A") },
-            leadingContent = {
+        Surface(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.tertiaryContainer
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Rounded.Schedule,
+                    imageVector = Icons.Rounded.Timer,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
-            },
-            trailingContent = {
-                IconButton(onClick = { state.showEditEndTime = true }) {
-                    Icon(
-                        imageVector = Icons.Rounded.Edit,
-                        contentDescription = "Modifier"
-                    )
-                }
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        )
+                Text(
+                    text = formatDuration(trip.startTime, trip.endTime),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Durée",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 
@@ -306,17 +277,6 @@ fun ArrivedScreenDialogs(
                 state.showEditEndKm = false
             }
         )
-    }
-}
-
-private fun formatTime(timestamp: Long): String {
-    return try {
-        val instant = Instant.ofEpochMilli(timestamp)
-        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
-    } catch (e: Exception) {
-        "N/A"
     }
 }
 
