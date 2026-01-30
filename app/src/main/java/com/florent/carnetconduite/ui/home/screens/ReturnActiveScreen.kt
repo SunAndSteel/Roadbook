@@ -10,16 +10,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Flag
-import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -38,16 +32,12 @@ import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 import org.koin.androidx.compose.koinViewModel
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun ReturnActiveScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
     val state = rememberReturnActiveScreenState()
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ReturnActiveScreenContent(trip = trip, state = state)
+        ReturnActiveScreenContent(state = state)
         ReturnActiveScreenPrimaryAction(trip = trip, state = state, viewModel = viewModel)
     }
     ReturnActiveScreenDialogs(trip = trip, state = state, viewModel = viewModel)
@@ -57,13 +47,14 @@ fun ReturnActiveScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
 class ReturnActiveScreenState {
     var endKm by mutableStateOf("")
     var showEditStartTime by mutableStateOf(false)
+    var showEditEndTime by mutableStateOf(false)
 }
 
 @Composable
 fun rememberReturnActiveScreenState(): ReturnActiveScreenState = remember { ReturnActiveScreenState() }
 
 @Composable
-fun ReturnActiveScreenContent(trip: Trip, state: ReturnActiveScreenState) {
+fun ReturnActiveScreenContent(state: ReturnActiveScreenState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -82,31 +73,6 @@ fun ReturnActiveScreenContent(trip: Trip, state: ReturnActiveScreenState) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
-        ListItem(
-            headlineContent = { Text("Modifier l'heure de départ") },
-            supportingContent = { Text(formatTime(trip.startTime)) },
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Rounded.Schedule,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-            },
-            trailingContent = {
-                IconButton(onClick = { state.showEditStartTime = true }) {
-                    Icon(
-                        imageVector = Icons.Rounded.Edit,
-                        contentDescription = "Modifier l'heure"
-                    )
-                }
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        )
-
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         OutlinedTextField(
             value = state.endKm,
@@ -177,15 +143,14 @@ fun ReturnActiveScreenDialogs(
             }
         )
     }
-}
-
-private fun formatTime(timestamp: Long): String {
-    return try {
-        val instant = Instant.ofEpochMilli(timestamp)
-        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.FRENCH)
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
-    } catch (e: Exception) {
-        "N/A"
+    if (state.showEditEndTime) {
+        TimePickerDialog(
+            initialTime = trip.endTime ?: System.currentTimeMillis(),
+            onDismiss = { state.showEditEndTime = false },
+            onConfirm = { newTime ->
+                viewModel.editEndTime(trip.id, newTime)
+                state.showEditEndTime = false
+            }
+        )
     }
 }
