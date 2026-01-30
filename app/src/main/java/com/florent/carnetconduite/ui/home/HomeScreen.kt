@@ -8,9 +8,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -99,8 +101,89 @@ fun HomeScreen(
     val returnReadyState = rememberReturnReadyScreenState()
     val returnActiveState = rememberReturnActiveScreenState()
 
+    val currentTripForAction = findTripForState(drivingState, trips)
+    val primaryAction = when (drivingState) {
+        DrivingState.IDLE -> {
+            {
+                PrimaryActionArea {
+                    IdleScreenPrimaryAction(state = idleState, viewModel = viewModel)
+                }
+            }
+        }
+        DrivingState.OUTWARD_ACTIVE -> {
+            currentTripForAction?.let { trip ->
+                {
+                    PrimaryActionArea {
+                        OutwardActiveScreenPrimaryAction(
+                            trip = trip,
+                            state = outwardState,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+        }
+        DrivingState.ARRIVED -> {
+            currentTripForAction?.let { trip ->
+                {
+                    PrimaryActionArea {
+                        ArrivedScreenPrimaryAction(
+                            trip = trip,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+        }
+        DrivingState.RETURN_READY -> {
+            currentTripForAction?.let { trip ->
+                {
+                    PrimaryActionArea {
+                        ReturnReadyScreenPrimaryAction(
+                            trip = trip,
+                            state = returnReadyState,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+        }
+        DrivingState.RETURN_ACTIVE -> {
+            currentTripForAction?.let { trip ->
+                {
+                    PrimaryActionArea {
+                        ReturnActiveScreenPrimaryAction(
+                            trip = trip,
+                            state = returnActiveState,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+        }
+        DrivingState.COMPLETED -> {
+            {
+                PrimaryActionArea {
+                    CompletedScreenPrimaryAction()
+                }
+            }
+        }
+    }
+
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            primaryAction?.let { action ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                ) {
+                    action()
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = modifier
@@ -134,56 +217,7 @@ fun HomeScreen(
                             statusColor = colors.statusColor,
                             containerColor = colors.headerContainer,
                             onContainerColor = colors.onHeaderContainer,
-                            showActiveIndicator = state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE,
-                            action = when (state) {
-                                DrivingState.IDLE -> {
-                                    {
-                                        PrimaryActionArea {
-                                            IdleScreenPrimaryAction(state = idleState, viewModel = viewModel)
-                                        }
-                                    }
-                                }
-                                DrivingState.OUTWARD_ACTIVE -> {
-                                    currentTrip?.let { trip ->
-                                        {
-                                            PrimaryActionArea {
-                                                OutwardActiveScreenPrimaryAction(
-                                                    trip = trip,
-                                                    state = outwardState,
-                                                    viewModel = viewModel
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                DrivingState.RETURN_READY -> {
-                                    currentTrip?.let { trip ->
-                                        {
-                                            PrimaryActionArea {
-                                                ReturnReadyScreenPrimaryAction(
-                                                    trip = trip,
-                                                    state = returnReadyState,
-                                                    viewModel = viewModel
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                DrivingState.RETURN_ACTIVE -> {
-                                    currentTrip?.let { trip ->
-                                        {
-                                            PrimaryActionArea {
-                                                ReturnActiveScreenPrimaryAction(
-                                                    trip = trip,
-                                                    state = returnActiveState,
-                                                    viewModel = viewModel
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                else -> null
-                            }
+                            showActiveIndicator = state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE
                         )
                     },
                     summary = currentTrip?.let { trip ->
@@ -260,12 +294,6 @@ fun HomeScreen(
                                     DrivingState.ARRIVED -> {
                                         currentTrip?.let {
                                             ArrivedScreenContent()
-                                            PrimaryActionArea {
-                                                ArrivedScreenPrimaryAction(
-                                                    trip = it,
-                                                    viewModel = viewModel
-                                                )
-                                            }
                                         }
                                     }
                                     DrivingState.RETURN_READY -> {
@@ -280,9 +308,6 @@ fun HomeScreen(
                                     }
                                     DrivingState.COMPLETED -> {
                                         CompletedScreenContent(viewModel = viewModel)
-                                        PrimaryActionArea {
-                                            CompletedScreenPrimaryAction()
-                                        }
                                     }
                                 }
                             }
