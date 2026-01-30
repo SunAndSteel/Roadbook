@@ -8,10 +8,11 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.domain.models.TripStatus
+import com.florent.carnetconduite.ui.home.components.PrimaryActionCard
+import com.florent.carnetconduite.ui.home.components.PrimaryActionInfoLine
 import com.florent.carnetconduite.ui.home.screens.ArrivedScreenContent
 import com.florent.carnetconduite.ui.home.screens.ArrivedStatsSection
 import com.florent.carnetconduite.ui.home.screens.CompletedScreenContent
-import com.florent.carnetconduite.ui.home.screens.CompletedScreenPrimaryAction
 import com.florent.carnetconduite.ui.home.screens.IdleScreenContent
 import com.florent.carnetconduite.ui.home.screens.IdleScreenState
 import com.florent.carnetconduite.ui.home.screens.OutwardActiveScreenContent
@@ -22,6 +23,8 @@ import com.florent.carnetconduite.ui.home.screens.ReturnReadyScreenContent
 import com.florent.carnetconduite.ui.home.screens.ReturnReadyScreenState
 import com.florent.carnetconduite.ui.preview.DevicePreview
 import com.florent.carnetconduite.ui.preview.RoadbookTheme
+import com.florent.carnetconduite.util.formatTime
+import com.florent.carnetconduite.util.formatTimeRange
 
 private const val PreviewStartTime = 1704445200000L
 private const val PreviewEndTime = PreviewStartTime + 45 * 60 * 1000L
@@ -110,7 +113,17 @@ fun HomeScreenIdlePreview() {
                 guideExpanded = false
             }
         }
-        IdleScreenContent(state = state)
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            IdleScreenContent(state = state)
+            PrimaryActionCard(
+                title = "Prêt à partir",
+                subtitle = "Aucun trajet en cours",
+                icon = androidx.compose.material.icons.Icons.Rounded.DirectionsCar,
+                infoLines = emptyList(),
+                actionLabel = "Démarrer",
+                onAction = {}
+            )
+        }
     }
 }
 
@@ -124,7 +137,26 @@ fun HomeScreenOutwardActivePreview() {
                 endPlace = "Pessac"
             }
         }
-        OutwardActiveScreenContent(state = state)
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            OutwardActiveScreenContent(state = state)
+            PrimaryActionCard(
+                title = "Trajet en cours",
+                subtitle = "Depuis ${formatTime(PreviewStartTime)}",
+                icon = androidx.compose.material.icons.Icons.Rounded.DirectionsCar,
+                infoLines = listOf(
+                    PrimaryActionInfoLine(
+                        icon = androidx.compose.material.icons.Icons.Rounded.LocationOn,
+                        text = "Bordeaux - Centre → ${state.endPlace}"
+                    ),
+                    PrimaryActionInfoLine(
+                        icon = androidx.compose.material.icons.Icons.Rounded.Schedule,
+                        text = formatTime(PreviewStartTime)
+                    )
+                ),
+                actionLabel = "Arrivée",
+                onAction = {}
+            )
+        }
     }
 }
 
@@ -135,6 +167,23 @@ fun HomeScreenArrivedPreview() {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             ArrivedScreenContent()
             ArrivedStatsSection(trip = previewArrivedTrip, onEditDistance = null)
+            PrimaryActionCard(
+                title = "Arrivée confirmée",
+                subtitle = "Trajet aller terminé",
+                icon = androidx.compose.material.icons.Icons.Rounded.Flag,
+                infoLines = listOf(
+                    PrimaryActionInfoLine(
+                        icon = androidx.compose.material.icons.Icons.Rounded.LocationOn,
+                        text = "Bordeaux - Centre → Pessac"
+                    ),
+                    PrimaryActionInfoLine(
+                        icon = androidx.compose.material.icons.Icons.Rounded.Schedule,
+                        text = formatTimeRange(PreviewStartTime, PreviewEndTime, ongoingLabel = "—")
+                    )
+                ),
+                actionLabel = "Décision",
+                onAction = {}
+            )
         }
     }
 }
@@ -148,7 +197,17 @@ fun HomeScreenReturnReadyPreview() {
                 editedStartKm = "12620"
             }
         }
-        ReturnReadyScreenContent(trip = previewReturnReadyTrip, state = state)
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            ReturnReadyScreenContent(trip = previewReturnReadyTrip, state = state)
+            PrimaryActionCard(
+                title = "Retour prêt",
+                subtitle = "Trajet retour prêt",
+                icon = androidx.compose.material.icons.Icons.Rounded.UTurnLeft,
+                infoLines = emptyList(),
+                actionLabel = "Décision",
+                onAction = {}
+            )
+        }
     }
 }
 
@@ -161,7 +220,26 @@ fun HomeScreenReturnActivePreview() {
                 endKm = "12810"
             }
         }
-        ReturnActiveScreenContent(state = state)
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            ReturnActiveScreenContent(state = state)
+            PrimaryActionCard(
+                title = "Trajet en cours",
+                subtitle = "Depuis ${formatTime(PreviewEndTime)}",
+                icon = androidx.compose.material.icons.Icons.Rounded.KeyboardReturn,
+                infoLines = listOf(
+                    PrimaryActionInfoLine(
+                        icon = androidx.compose.material.icons.Icons.Rounded.LocationOn,
+                        text = "Pessac → Bordeaux - Centre"
+                    ),
+                    PrimaryActionInfoLine(
+                        icon = androidx.compose.material.icons.Icons.Rounded.Schedule,
+                        text = formatTime(PreviewEndTime)
+                    )
+                ),
+                actionLabel = "Arrivée",
+                onAction = {}
+            )
+        }
     }
 }
 
@@ -171,7 +249,14 @@ fun HomeScreenCompletedPreview() {
     RoadbookTheme {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             CompletedScreenContent(tripGroups = previewTripGroups)
-            CompletedScreenPrimaryAction()
+            PrimaryActionCard(
+                title = "Trajets sauvegardés",
+                subtitle = "Session terminée",
+                icon = androidx.compose.material.icons.Icons.Rounded.CheckCircle,
+                infoLines = emptyList(),
+                actionLabel = "Nouveau trajet",
+                onAction = {}
+            )
         }
     }
 }

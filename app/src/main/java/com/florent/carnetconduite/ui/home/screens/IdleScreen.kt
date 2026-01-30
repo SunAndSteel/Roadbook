@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -26,7 +24,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +49,6 @@ fun IdleScreen(viewModel: HomeViewModel = koinViewModel()) {
     val state = rememberIdleScreenState()
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         IdleScreenContent(state = state)
-        IdleScreenPrimaryAction(state = state, viewModel = viewModel)
     }
 }
 
@@ -232,37 +228,5 @@ fun IdleScreenContent(state: IdleScreenState) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun IdleScreenPrimaryAction(
-    state: IdleScreenState,
-    viewModel: HomeViewModel
-) {
-    FilledTonalButton(
-        onClick = {
-            viewModel.startOutward(
-                startKm = state.startKm.toIntOrNull() ?: 0,
-                startPlace = state.startPlace,
-                conditions = state.conditions,
-                guide = state.guide
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Rounded.PlayArrow,
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = "Démarrer le trajet",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
     }
 }
