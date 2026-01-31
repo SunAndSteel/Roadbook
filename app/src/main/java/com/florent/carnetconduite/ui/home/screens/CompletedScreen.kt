@@ -41,12 +41,18 @@ fun CompletedScreen(viewModel: HomeViewModel = koinViewModel()) {
     }
 }
 
+/**
+ * Version "prod" branchée sur le ViewModel.
+ */
 @Composable
 fun CompletedScreenContent(viewModel: HomeViewModel) {
     val tripGroups by viewModel.tripGroups.collectAsState()
     CompletedScreenContent(tripGroups = tripGroups)
 }
 
+/**
+ * Version "pure UI" (utile pour @Preview + tests)
+ */
 @Composable
 fun CompletedScreenContent(tripGroups: List<TripGroup>) {
     val completedCount = tripGroups.count { group -> group.isComplete }
@@ -117,10 +123,7 @@ fun CompletedScreenPrimaryAction() {
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
-                contentDescription = null
-            )
+            Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "Nouveau trajet",
@@ -135,10 +138,7 @@ fun CompletedScreenPrimaryAction() {
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Icon(
-                imageVector = Icons.Rounded.History,
-                contentDescription = null
-            )
+            Icon(imageVector = Icons.Rounded.History, contentDescription = null)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "Voir l'historique",

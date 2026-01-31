@@ -108,17 +108,31 @@ internal fun colorsForState(state: DrivingState): StepColors {
 
 internal fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
     return when (state) {
-        DrivingState.OUTWARD_ACTIVE -> trips.find {
-            it.endKm == null && !it.isReturn && it.status == TripStatus.ACTIVE
+        DrivingState.OUTWARD_ACTIVE -> trips.find { trip ->
+            !trip.isReturn && trip.endKm == null && trip.status == TripStatus.ACTIVE
         }
-        DrivingState.ARRIVED -> trips.find {
-            !it.isReturn && it.endKm != null &&
-                trips.none { return@none it.pairedTripId == trips.find { !it.isReturn }?.id && it.isReturn }
+
+        DrivingState.ARRIVED -> {
+            // Dernier aller terminé qui n'a pas (encore) de retour associé.
+            val candidate = trips
+                .asSequence()
+                .filter { trip -> !trip.isReturn && trip.endKm != null }
+                .sortedByDescending { trip -> trip.endTime ?: trip.startTime }
+                .firstOrNull { outward ->
+                    trips.none { t -> t.isReturn && t.pairedTripId == outward.id }
+                }
+
+            candidate
         }
-        DrivingState.RETURN_READY -> trips.find { it.isReturn && it.status == TripStatus.READY }
-        DrivingState.RETURN_ACTIVE -> trips.find {
-            it.isReturn && it.endKm == null && it.status == TripStatus.ACTIVE
+
+        DrivingState.RETURN_READY -> trips.find { trip ->
+            trip.isReturn && trip.status == TripStatus.READY
         }
+
+        DrivingState.RETURN_ACTIVE -> trips.find { trip ->
+            trip.isReturn && trip.endKm == null && trip.status == TripStatus.ACTIVE
+        }
+
         else -> null
     }
 }

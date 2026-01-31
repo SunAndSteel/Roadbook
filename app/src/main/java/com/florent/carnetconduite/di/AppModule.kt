@@ -138,7 +138,6 @@ val appModule = module {
         HistoryViewModel(
             get(),
             get(),
-            get(),
             get()
         )
     }
