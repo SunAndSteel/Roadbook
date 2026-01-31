@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.components.PrimaryActionArea
-import com.florent.carnetconduite.ui.home.components.TripHeader
+import com.florent.carnetconduite.ui.home.components.TripHeaderCompact
 import com.florent.carnetconduite.ui.home.components.TripSummaryHeader
 import com.florent.carnetconduite.ui.home.components.TripSummaryVariant
 import com.florent.carnetconduite.ui.home.mapper.colorsForState
@@ -82,7 +82,7 @@ fun HomeScreen(
     val returnReadyTrip = findTripForState(DrivingState.RETURN_READY, trips)
     val returnActiveTrip = findTripForState(DrivingState.RETURN_ACTIVE, trips)
 
-    // “trip principal” pour le résumé en haut
+    // “trip principal” pour le résumé
     val headerTrip = when (drivingState) {
         DrivingState.OUTWARD_ACTIVE -> outwardTrip
         DrivingState.ARRIVED -> arrivedTrip
@@ -95,8 +95,9 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-        // Réserve safe : bottom nav (~80dp) + barre sticky (~96dp)
-        val reservedBottom = 80.dp + 96.dp
+        // Réserve safe : bottom nav (~80dp) + bottom bar fusionnée (header compact + CTA)
+        // Ajuste si tu changes la densité de la barre.
+        val reservedBottom = 80.dp + 156.dp
 
         Box(
             modifier = modifier
@@ -122,17 +123,9 @@ fun HomeScreen(
                 ) { state ->
                     val header = headerForState(state)
                     val colors = colorsForState(state)
-                    val showActiveIndicator =
-                        state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE
 
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        TripHeader(
-                            header,
-                            colors.statusColor,
-                            colors.headerContainer,
-                            colors.onHeaderContainer,
-                            showActiveIndicator
-                        )
+                        // ✅ TripHeader n’est PLUS en haut : il vit en bas dans la barre sticky
 
                         // Résumé seulement quand un trip existe et pas en Completed
                         if (headerTrip != null && state != DrivingState.COMPLETED) {
@@ -173,7 +166,12 @@ fun HomeScreen(
                 }
             }
 
-            // -------- BARRE D’ACTION STICKY --------
+            // -------- BARRE STICKY FUSIONNÉE (HEADER + CTA) --------
+            val bottomHeader = headerForState(drivingState)
+            val bottomColors = colorsForState(drivingState)
+            val showActiveIndicator =
+                drivingState == DrivingState.OUTWARD_ACTIVE || drivingState == DrivingState.RETURN_ACTIVE
+
             Surface(
                 tonalElevation = 3.dp,
                 shadowElevation = 6.dp,
@@ -186,8 +184,17 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    // ✅ Header compact collé au CTA (philosophie “expressive bottom bar”)
+                    TripHeaderCompact(
+                        header = bottomHeader,
+                        statusColor = bottomColors.statusColor,
+                        containerColor = bottomColors.headerContainer,
+                        onContainerColor = bottomColors.onHeaderContainer,
+                        showActiveIndicator = showActiveIndicator
+                    )
+
                     PrimaryActionArea {
                         when (drivingState) {
                             DrivingState.IDLE ->
