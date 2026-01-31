@@ -13,7 +13,6 @@ import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.home.components.TripHeaderData
-import com.florent.carnetconduite.util.formatTimeRange
 
 internal data class StepColors(
     val headerContainer: Color,
@@ -139,6 +138,3 @@ internal fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
     }
 }
 
-internal fun formatTripTime(trip: Trip): String {
-    return formatTimeRange(trip.startTime, trip.endTime, ongoingLabel = "En cours")
-}
