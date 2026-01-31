@@ -47,12 +47,14 @@ class HomeViewModel(
     private val logger: AppLogger
 ) : ViewModel() {
 
+    private val sharingStarted = SharingStarted.WhileSubscribed(5000)
+
     private val _uiEvent = MutableSharedFlow<UiEvent>()
     val uiEvent: SharedFlow<UiEvent> = _uiEvent.asSharedFlow()
 
     val trips: StateFlow<List<Trip>> = repository.allTrips.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = sharingStarted,
         initialValue = emptyList()
     )
 
@@ -60,30 +62,30 @@ class HomeViewModel(
         .map { tripList -> groupTrips(tripList) }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = sharingStarted,
             initialValue = emptyList()
         )
 
     val activeTrip: StateFlow<Trip?> = repository.activeTrip.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = sharingStarted,
         initialValue = null
     )
 
     val arrivedTrip: StateFlow<Trip?> = trips
-        .map { tripList -> findArrivedTrip(tripList) }
+        .map { tripList -> findPendingArrivalTrip(tripList) }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = sharingStarted,
             initialValue = null
         )
 
     // Petit latch pour afficher l'état "COMPLETED" sans effet de bord sur la data.
-    private val completionLatch = MutableStateFlow(false)
+    private val completionPulse = MutableStateFlow(false)
 
     val drivingState: StateFlow<DrivingState> = trips
-        .combine(completionLatch) { tripList, latch ->
-            if (latch) {
+        .combine(completionPulse) { tripList, pulse ->
+            if (pulse) {
                 DrivingState.COMPLETED
             } else {
                 computeStateUseCase(tripList)
@@ -91,11 +93,11 @@ class HomeViewModel(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = sharingStarted,
             initialValue = DrivingState.IDLE
         )
 
-    private fun findArrivedTrip(tripList: List<Trip>): Trip? {
+    private fun findPendingArrivalTrip(tripList: List<Trip>): Trip? {
         val latestOutward = tripList
             .filter { !it.isReturn && it.isCompleted }
             .maxByOrNull { it.id }
@@ -131,9 +133,9 @@ class HomeViewModel(
 
     private fun triggerCompletionLatch() {
         viewModelScope.launch {
-            completionLatch.value = true
+            completionPulse.value = true
             delay(600)
-            completionLatch.value = false
+            completionPulse.value = false
         }
     }
 

@@ -9,10 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun PrimaryActionArea(content: @Composable () -> Unit) {
+internal fun PrimaryActionArea(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     // Zone dédiée au CTA principal selon l'état de conduite.
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)

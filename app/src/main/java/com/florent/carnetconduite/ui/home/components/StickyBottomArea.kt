@@ -18,8 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
-import com.florent.carnetconduite.data.Trip
-import com.florent.carnetconduite.ui.home.HomeUnifiedState
+import com.florent.carnetconduite.ui.home.HomeTripSnapshot
+import com.florent.carnetconduite.ui.home.HomeUiState
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionPrimaryAction
 import com.florent.carnetconduite.ui.home.sections.CompletedSummaryPrimaryAction
@@ -31,11 +31,8 @@ import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormPrimaryAction
 @Composable
 fun StickyBottomArea(
     drivingState: DrivingState,
-    outwardTrip: Trip?,
-    arrivedTrip: Trip?,
-    returnReadyTrip: Trip?,
-    returnActiveTrip: Trip?,
-    ui: HomeUnifiedState,
+    tripSnapshot: HomeTripSnapshot,
+    ui: HomeUiState,
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -55,10 +52,10 @@ fun StickyBottomArea(
             // Pendant ARRIVED : champs d'arrivée collés au CTA.
             if (drivingState == DrivingState.ARRIVED) {
                 ArrivalInputsCard(
-                    endKmText = ui.arrived.endKmText,
-                    onEndKmChange = { ui.arrived.endKmText = it },
-                    arrivalPlace = ui.arrived.arrivalPlace,
-                    onArrivalPlaceChange = { ui.arrived.arrivalPlace = it }
+                    endKmText = ui.arrival.arrivalKmText,
+                    onEndKmChange = { ui.arrival.arrivalKmText = it },
+                    arrivalPlace = ui.arrival.arrivalPlace,
+                    onArrivalPlaceChange = { ui.arrival.arrivalPlace = it }
                 )
             }
 
@@ -68,23 +65,23 @@ fun StickyBottomArea(
                         IdleFormPrimaryAction(ui.idle, viewModel)
 
                     DrivingState.OUTWARD_ACTIVE ->
-                        outwardTrip?.let { trip ->
+                        tripSnapshot.outward?.let { trip ->
                             OutwardActiveFormPrimaryAction(trip, ui.outward, viewModel)
                         }
 
                     DrivingState.ARRIVED ->
-                        arrivedTrip?.let { trip ->
-                            // Ici ton PrimaryAction “Termine le trajet” peut utiliser ui.arrived.endKmText / arrivalPlace
+                        tripSnapshot.arrived?.let { trip ->
+                            // Ici ton PrimaryAction “Termine le trajet” peut utiliser ui.arrival.arrivalKmText / arrivalPlace
                             ArrivedDecisionPrimaryAction(trip, viewModel)
                         }
 
                     DrivingState.RETURN_READY ->
-                        returnReadyTrip?.let { trip ->
+                        tripSnapshot.returnReady?.let { trip ->
                             ReturnReadyFormPrimaryAction(trip, ui.returnReady, viewModel)
                         }
 
                     DrivingState.RETURN_ACTIVE ->
-                        returnActiveTrip?.let { trip ->
+                        tripSnapshot.returnActive?.let { trip ->
                             ReturnActiveFormPrimaryAction(trip, ui.returnActive, viewModel)
                         }
 

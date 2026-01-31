@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.CompareArrows
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.CompareArrows
 import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material3.FilledTonalButton
@@ -33,14 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
-import com.florent.carnetconduite.ui.home.ArrivedUiState
+import com.florent.carnetconduite.ui.home.ArrivalInputsState
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 
 @Composable
 fun ArrivedFormContent(
-    state: ArrivedUiState,
+    state: ArrivalInputsState,
     showArrivalInputs: Boolean
 ) {
     Column(
@@ -55,8 +55,8 @@ fun ArrivedFormContent(
         if (showArrivalInputs) {
             // Champs d'arrivée affichés dans le formulaire (fallback sans sticky).
             ArrivedArrivalInputs(
-                endKmText = state.endKmText,
-                onEndKmChange = { state.endKmText = it },
+                endKmText = state.arrivalKmText,
+                onEndKmChange = { state.arrivalKmText = it },
                 arrivalPlace = state.arrivalPlace,
                 onArrivalPlaceChange = { state.arrivalPlace = it }
             )
@@ -182,10 +182,10 @@ fun ArrivedDecisionPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
             shape = RoundedCornerShape(12.dp)
         ) {
             Icon(
-                imageVector = Icons.Rounded.CompareArrows,
+                imageVector = Icons.AutoMirrored.Rounded.CompareArrows,
                 contentDescription = null
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.size(12.dp))
             Text(
                 text = "Oui, préparer un retour",
                 style = MaterialTheme.typography.titleMedium,
@@ -201,10 +201,10 @@ fun ArrivedDecisionPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
             shape = RoundedCornerShape(12.dp)
         ) {
             Icon(
-                imageVector = Icons.Rounded.ArrowForward,
+                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                 contentDescription = null
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.size(12.dp))
             Text(
                 text = "Non, trajet simple",
                 style = MaterialTheme.typography.titleMedium,
@@ -217,29 +217,29 @@ fun ArrivedDecisionPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
 @Composable
 fun ArrivedDecisionDialogs(
     trip: Trip?,
-    state: ArrivedUiState,
+    state: ArrivalInputsState,
     viewModel: HomeViewModel
 ) {
     if (trip == null) return
-    if (state.showEditEndTime) {
+    if (state.showEditArrivalTime) {
         TimePickerDialog(
             initialTime = trip.endTime ?: System.currentTimeMillis(),
-            onDismiss = { state.showEditEndTime = false },
+            onDismiss = { state.showEditArrivalTime = false },
             onConfirm = { newTime ->
                 viewModel.editEndTime(trip.id, newTime)
-                state.showEditEndTime = false
+                state.showEditArrivalTime = false
             }
         )
     }
 
-    if (state.showEditEndKm) {
+    if (state.showEditArrivalKm) {
         EditKmDialog(
             title = "Modifier km arrivée",
             initialKm = trip.endKm ?: 0,
-            onDismiss = { state.showEditEndKm = false },
+            onDismiss = { state.showEditArrivalKm = false },
             onConfirm = { newKm ->
                 viewModel.editEndKm(trip.id, newKm)
-                state.showEditEndKm = false
+                state.showEditArrivalKm = false
             }
         )
     }

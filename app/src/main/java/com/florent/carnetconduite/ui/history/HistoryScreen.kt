@@ -3,9 +3,9 @@ package com.florent.carnetconduite.ui.history
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,40 +55,43 @@ fun HistoryScreen(
         }
     }
 
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatsHeader(
-            totalDistance = tripStats.totalKm,
-            totalDuration = tripStats.totalDurationMs,
-            tripCount = tripStats.totalTrips,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        item {
+            StatsHeader(
+                totalDistance = tripStats.totalKm,
+                totalDuration = tripStats.totalDurationMs,
+                tripCount = tripStats.totalTrips,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         if (tripGroups.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Aucun trajet dans l'historique",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(tripGroups) { group ->
-                    TripGroupCard(
-                        tripGroup = group,
-                        onEdit = { selectedGroupForEdit = group },
-                        onDelete = { viewModel.deleteTripGroup(group) }
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Aucun trajet dans l'historique",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+        } else {
+            items(tripGroups) { group ->
+                TripGroupCard(
+                    tripGroup = group,
+                    onEdit = { selectedGroupForEdit = group },
+                    onDelete = { viewModel.deleteTripGroup(group) }
+                )
             }
         }
     }

@@ -6,9 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
@@ -63,8 +62,7 @@ internal fun TripHeaderCompact(
                 shape = MaterialTheme.shapes.large,
                 color = statusColor,
                 modifier = Modifier
-                    .height(44.dp)
-                    .width(44.dp)
+                    .size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     Icon(
@@ -105,8 +103,7 @@ internal fun TripHeaderCompact(
                             PulsingDot(
                                 color = statusColor,
                                 modifier = Modifier
-                                    .height(8.dp)
-                                    .width(8.dp)
+                                    .size(8.dp)
                             )
                         }
                         Text(

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -44,7 +44,7 @@ fun CompletedSummaryContent(tripGroups: List<TripGroup>) {
             Icon(
                 imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = null,
-                modifier = Modifier.height(64.dp),
+                modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
 
@@ -101,7 +101,7 @@ fun CompletedSummaryPrimaryAction() {
                 .height(56.dp)
         ) {
             Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.size(12.dp))
             Text(
                 text = "Nouveau trajet",
                 style = MaterialTheme.typography.titleMedium,
@@ -116,7 +116,7 @@ fun CompletedSummaryPrimaryAction() {
                 .height(56.dp)
         ) {
             Icon(imageVector = Icons.Rounded.History, contentDescription = null)
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.size(12.dp))
             Text(
                 text = "Voir l'historique",
                 style = MaterialTheme.typography.titleMedium,
