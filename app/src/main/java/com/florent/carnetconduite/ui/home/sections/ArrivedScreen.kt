@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.home.screens
+package com.florent.carnetconduite.ui.home.sections
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement

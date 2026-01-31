@@ -34,20 +34,22 @@ import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.components.PrimaryActionArea
 import com.florent.carnetconduite.ui.home.components.TripHeaderCompact
+import com.florent.carnetconduite.ui.home.components.TripSummaryEdit
 import com.florent.carnetconduite.ui.home.components.TripSummaryHeader
 import com.florent.carnetconduite.ui.home.components.TripSummaryVariant
 import com.florent.carnetconduite.ui.home.mapper.colorsForState
 import com.florent.carnetconduite.ui.home.mapper.findTripForState
 import com.florent.carnetconduite.ui.home.mapper.headerForState
-import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionDialogs
-import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.CompletedSummaryPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.IdleFormPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveFormDialogs
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveFormPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveFormDialogs
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveFormPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.ReturnReadyFormPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionDialogs
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.CompletedSummaryPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.IdleFormPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormDialogs
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormDialogs
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormPrimaryAction
+import com.florent.carnetconduite.util.formatTime
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -63,7 +65,6 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
 
-    // ✅ Un seul “bundle” d’état UI pour tous les modes
     val ui = rememberHomeUnifiedState()
 
     LaunchedEffect(Unit) {
@@ -76,13 +77,11 @@ fun HomeScreen(
         }
     }
 
-    // ✅ On calcule les trips utiles UNE FOIS (pas de “currentTrip” ambigu)
     val outwardTrip = findTripForState(DrivingState.OUTWARD_ACTIVE, trips)
     val arrivedTrip = findTripForState(DrivingState.ARRIVED, trips)
     val returnReadyTrip = findTripForState(DrivingState.RETURN_READY, trips)
     val returnActiveTrip = findTripForState(DrivingState.RETURN_ACTIVE, trips)
 
-    // “trip principal” pour le résumé
     val headerTrip = when (drivingState) {
         DrivingState.OUTWARD_ACTIVE -> outwardTrip
         DrivingState.ARRIVED -> arrivedTrip
@@ -95,16 +94,14 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-        // Réserve safe : bottom nav (~80dp) + bottom bar fusionnée (header compact + CTA)
-        // Ajuste si tu changes la densité de la barre.
-        val reservedBottom = 80.dp + 156.dp
+        val reservedBottom = 84.dp + 170.dp
 
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // -------- CONTENU SCROLLABLE --------
+            // ----- CONTENU : juste le form -----
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -116,65 +113,47 @@ fun HomeScreen(
                 AnimatedContent(
                     targetState = drivingState,
                     transitionSpec = {
-                        fadeIn() + slideInVertically { it / 6 } togetherWith
-                                fadeOut() + slideOutVertically { -it / 6 }
+                        fadeIn() + slideInVertically { it / 10 } togetherWith
+                                fadeOut() + slideOutVertically { -it / 10 }
                     },
-                    label = "HomeStepTransition"
+                    label = "HomeUnifiedTransition"
                 ) { state ->
-                    val header = headerForState(state)
                     val colors = colorsForState(state)
 
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        // ✅ TripHeader n’est PLUS en haut : il vit en bas dans la barre sticky
-
-                        // Résumé seulement quand un trip existe et pas en Completed
-                        if (headerTrip != null && state != DrivingState.COMPLETED) {
-                            TripSummaryHeader(
-                                headerTrip,
-                                TripSummaryVariant.Minimal,
-                                header.statusLabel,
-                                colors.statusColor,
-                                false
-                            )
-                        }
-
-                        ElevatedCard(
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.elevatedCardColors(containerColor = colors.cardContainer),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
+                    ) {
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 4.dp),
-                            colors = CardDefaults.elevatedCardColors(containerColor = colors.cardContainer),
-                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(20.dp),
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                HomeFormSection(
-                                    drivingState = state,
-                                    ui = ui,
-                                    outwardTrip = outwardTrip,
-                                    arrivedTrip = arrivedTrip,
-                                    returnReadyTrip = returnReadyTrip,
-                                    returnActiveTrip = returnActiveTrip,
-                                    tripGroups = tripGroups
-                                )
-                            }
+                            HomeFormSection(
+                                drivingState = state,
+                                ui = ui,
+                                outwardTrip = outwardTrip,
+                                arrivedTrip = arrivedTrip,
+                                returnReadyTrip = returnReadyTrip,
+                                returnActiveTrip = returnActiveTrip,
+                                tripGroups = tripGroups
+                            )
                         }
                     }
                 }
             }
 
-            // -------- BARRE STICKY FUSIONNÉE (HEADER + CTA) --------
-            val bottomHeader = headerForState(drivingState)
-            val bottomColors = colorsForState(drivingState)
+            // ----- BOTTOM BAR : header + summary + CTA -----
+            val header = headerForState(drivingState)
+            val colors = colorsForState(drivingState)
             val showActiveIndicator =
                 drivingState == DrivingState.OUTWARD_ACTIVE || drivingState == DrivingState.RETURN_ACTIVE
 
             Surface(
                 tonalElevation = 3.dp,
-                shadowElevation = 6.dp,
+                shadowElevation = 10.dp,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
@@ -183,17 +162,31 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // ✅ Header compact collé au CTA (philosophie “expressive bottom bar”)
                     TripHeaderCompact(
-                        header = bottomHeader,
-                        statusColor = bottomColors.statusColor,
-                        containerColor = bottomColors.headerContainer,
-                        onContainerColor = bottomColors.onHeaderContainer,
+                        header = header,
+                        statusColor = colors.statusColor,
+                        containerColor = colors.headerContainer,
+                        onContainerColor = colors.onHeaderContainer,
                         showActiveIndicator = showActiveIndicator
                     )
+
+                    if (headerTrip != null && drivingState != DrivingState.COMPLETED) {
+                        TripSummaryHeader(
+                            trip = headerTrip,
+                            variant = TripSummaryVariant.Sticky,
+                            statusLabel = header.statusLabel,
+                            statusColor = colors.statusColor,
+                            showDistance = false,
+                            edit = editForState(
+                                state = drivingState,
+                                trip = headerTrip,
+                                ui = ui
+                            )
+                        )
+                    }
 
                     PrimaryActionArea {
                         when (drivingState) {
@@ -227,10 +220,59 @@ fun HomeScreen(
                 }
             }
 
-            // -------- DIALOGS (overlay) --------
+            // ----- DIALOGS -----
             OutwardActiveFormDialogs(outwardTrip, ui.outward, viewModel)
             ReturnActiveFormDialogs(returnActiveTrip, ui.returnActive, viewModel)
             ArrivedDecisionDialogs(arrivedTrip, ui.arrived, viewModel)
         }
+    }
+}
+
+/**
+ * ✅ Un seul champ éditable pertinent.
+ * ⚠️ Remplace les 3 lignes "ui.xxx.____ = true" par TES noms exacts.
+ */
+@Composable
+private fun editForState(
+    state: DrivingState,
+    trip: com.florent.carnetconduite.data.Trip,
+    ui: HomeUnifiedState
+): TripSummaryEdit? {
+    return when (state) {
+        DrivingState.OUTWARD_ACTIVE -> {
+            // Exemple : éditer heure d’arrivée prévue / réelle (selon ton UX)
+            TripSummaryEdit(
+                label = "Heure d’arrivée",
+                value = if ((trip.endTime ?: 0L) > 0L) formatTime(trip.endTime!!) else "—",
+                onEdit = {
+                    // TODO: remplace par ton flag réel
+                    // ui.outward.showEditEndTime = true
+                }
+            )
+        }
+
+        DrivingState.ARRIVED -> {
+            TripSummaryEdit(
+                label = "Km d’arrivée",
+                value = (trip.endKm?.toString() ?: "—"),
+                onEdit = {
+                    // TODO: remplace par ton flag réel
+                    // ui.arrived.showEditEndKm = true
+                }
+            )
+        }
+
+        DrivingState.RETURN_ACTIVE -> {
+            TripSummaryEdit(
+                label = "Heure d’arrivée",
+                value = if ((trip.endTime ?: 0L) > 0L) formatTime(trip.endTime!!) else "—",
+                onEdit = {
+                    // TODO: remplace par ton flag réel
+                    // ui.returnActive.showEditEndTime = true
+                }
+            )
+        }
+
+        else -> null
     }
 }

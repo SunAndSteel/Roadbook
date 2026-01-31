@@ -2,16 +2,16 @@ package com.florent.carnetconduite.ui.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionState
-import com.florent.carnetconduite.ui.home.screens.IdleFormState
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveFormState
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveFormState
-import com.florent.carnetconduite.ui.home.screens.ReturnReadyFormState
-import com.florent.carnetconduite.ui.home.screens.rememberArrivedDecisionState
-import com.florent.carnetconduite.ui.home.screens.rememberIdleFormState
-import com.florent.carnetconduite.ui.home.screens.rememberOutwardActiveFormState
-import com.florent.carnetconduite.ui.home.screens.rememberReturnActiveFormState
-import com.florent.carnetconduite.ui.home.screens.rememberReturnReadyFormState
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionState
+import com.florent.carnetconduite.ui.home.sections.IdleFormState
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormState
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormState
+import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormState
+import com.florent.carnetconduite.ui.home.sections.rememberArrivedDecisionState
+import com.florent.carnetconduite.ui.home.sections.rememberIdleFormState
+import com.florent.carnetconduite.ui.home.sections.rememberOutwardActiveFormState
+import com.florent.carnetconduite.ui.home.sections.rememberReturnActiveFormState
+import com.florent.carnetconduite.ui.home.sections.rememberReturnReadyFormState
 
 @Stable
 data class HomeUnifiedState(

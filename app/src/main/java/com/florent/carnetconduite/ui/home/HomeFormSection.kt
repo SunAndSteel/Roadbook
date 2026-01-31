@@ -9,13 +9,13 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
-import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionContent
-import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionStatsSection
-import com.florent.carnetconduite.ui.home.screens.CompletedSummaryContent
-import com.florent.carnetconduite.ui.home.screens.IdleFormContent
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveFormContent
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveFormContent
-import com.florent.carnetconduite.ui.home.screens.ReturnReadyFormContent
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionContent
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionStatsSection
+import com.florent.carnetconduite.ui.home.sections.CompletedSummaryContent
+import com.florent.carnetconduite.ui.home.sections.IdleFormContent
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormContent
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormContent
+import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormContent
 
 /**
  * Une seule section “Form” qui change selon DrivingState.

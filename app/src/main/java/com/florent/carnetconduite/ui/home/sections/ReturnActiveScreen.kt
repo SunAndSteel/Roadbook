@@ -1,4 +1,4 @@
-package com.florent.carnetconduite.ui.home.screens
+package com.florent.carnetconduite.ui.home.sections
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Flag
-import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -34,18 +33,17 @@ import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 
 @Stable
-class OutwardActiveFormState {
+class ReturnActiveFormState {
     var endKm by mutableStateOf("")
-    var endPlace by mutableStateOf("")
     var showEditStartTime by mutableStateOf(false)
     var showEditEndTime by mutableStateOf(false)
 }
 
 @Composable
-fun rememberOutwardActiveFormState(): OutwardActiveFormState = remember { OutwardActiveFormState() }
+fun rememberReturnActiveFormState(): ReturnActiveFormState = remember { ReturnActiveFormState() }
 
 @Composable
-fun OutwardActiveFormContent(state: OutwardActiveFormState) {
+fun ReturnActiveFormContent(state: ReturnActiveFormState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -54,70 +52,49 @@ fun OutwardActiveFormContent(state: OutwardActiveFormState) {
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "Arrivée",
+                text = "Fin du retour",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "Renseigne uniquement l'arrivée. Le départ est déjà validé.",
+                text = "Le retour suit le même parcours. Tu peux clôturer la fin du trajet.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = state.endKm,
-                onValueChange = { state.endKm = it },
-                label = { Text("Kilométrage arrivée") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Speed,
-                        contentDescription = null
-                    )
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+        OutlinedTextField(
+            value = state.endKm,
+            onValueChange = { state.endKm = it },
+            label = { Text("Kilométrage arrivée") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Rounded.Speed,
+                    contentDescription = null
                 )
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface
             )
-
-            OutlinedTextField(
-                value = state.endPlace,
-                onValueChange = { state.endPlace = it },
-                label = { Text("Lieu d'arrivée") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.LocationOn,
-                        contentDescription = null
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        }
+        )
     }
 }
 
 @Composable
-fun OutwardActiveFormPrimaryAction(
+fun ReturnActiveFormPrimaryAction(
     trip: Trip,
-    state: OutwardActiveFormState,
+    state: ReturnActiveFormState,
     viewModel: HomeViewModel
 ) {
     FilledTonalButton(
         onClick = {
-            viewModel.finishOutward(
+            viewModel.finishReturn(
                 tripId = trip.id,
-                endKm = state.endKm.toIntOrNull() ?: 0,
-                endPlace = state.endPlace
+                endKm = state.endKm.toIntOrNull() ?: 0
             )
         },
         modifier = Modifier
@@ -131,7 +108,7 @@ fun OutwardActiveFormPrimaryAction(
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Terminer le trajet",
+            text = "Terminer le retour",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -139,13 +116,13 @@ fun OutwardActiveFormPrimaryAction(
 }
 
 @Composable
-fun OutwardActiveFormDialogs(
+fun ReturnActiveFormDialogs(
     trip: Trip?,
-    state: OutwardActiveFormState,
+    state: ReturnActiveFormState,
     viewModel: HomeViewModel
 ) {
     if (trip == null) return
-    if (state.showEditStartTime) {
+    if (state.showEditStartTime && trip.startTime > 0L) {
         TimePickerDialog(
             initialTime = trip.startTime,
             onDismiss = { state.showEditStartTime = false },

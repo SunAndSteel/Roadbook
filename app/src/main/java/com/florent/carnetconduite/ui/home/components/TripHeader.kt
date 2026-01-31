@@ -1,10 +1,6 @@
+// app/src/main/java/com/florent/carnetconduite/ui/home/components/TripHeader.kt
 package com.florent.carnetconduite.ui.home.components
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
@@ -24,11 +18,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +33,9 @@ internal data class TripHeaderData(
     val statusLabel: String
 )
 
+/**
+ * Header compact “expressive” : gros statut visuel + texte serré, parfait en sticky bar.
+ */
 @Composable
 internal fun TripHeaderCompact(
     header: TripHeaderData,
@@ -110,7 +105,9 @@ internal fun TripHeaderCompact(
                         if (showActiveIndicator) {
                             PulsingDot(
                                 color = statusColor,
-                                modifier = Modifier.size(8.dp)
+                                modifier = Modifier
+                                    .height(8.dp)
+                                    .width(8.dp)
                             )
                         }
                         Text(
@@ -132,5 +129,3 @@ internal fun TripHeaderCompact(
         }
     }
 }
-
-
