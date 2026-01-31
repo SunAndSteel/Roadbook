@@ -45,19 +45,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.ui.home.HomeViewModel
-import org.koin.androidx.compose.koinViewModel
-
-@Composable
-fun IdleScreen(viewModel: HomeViewModel = koinViewModel()) {
-    val state = rememberIdleScreenState()
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        IdleScreenContent(state = state)
-        IdleScreenPrimaryAction(state = state, viewModel = viewModel)
-    }
-}
 
 @Stable
-class IdleScreenState {
+class IdleFormState {
     var startKm by mutableStateOf("")
     var startPlace by mutableStateOf("")
     var conditions by mutableStateOf("")
@@ -67,11 +57,11 @@ class IdleScreenState {
 }
 
 @Composable
-fun rememberIdleScreenState(): IdleScreenState = remember { IdleScreenState() }
+fun rememberIdleFormState(): IdleFormState = remember { IdleFormState() }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IdleScreenContent(state: IdleScreenState) {
+fun IdleFormContent(state: IdleFormState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -236,8 +226,8 @@ fun IdleScreenContent(state: IdleScreenState) {
 }
 
 @Composable
-fun IdleScreenPrimaryAction(
-    state: IdleScreenState,
+fun IdleFormPrimaryAction(
+    state: IdleFormState,
     viewModel: HomeViewModel
 ) {
     FilledTonalButton(

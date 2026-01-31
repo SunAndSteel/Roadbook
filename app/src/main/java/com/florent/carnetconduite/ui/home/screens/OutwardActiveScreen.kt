@@ -32,20 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
-import org.koin.androidx.compose.koinViewModel
-
-@Composable
-fun OutwardActiveScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
-    val state = rememberOutwardActiveScreenState()
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        OutwardActiveScreenContent(state = state)
-        OutwardActiveScreenPrimaryAction(trip = trip, state = state, viewModel = viewModel)
-    }
-    OutwardActiveScreenDialogs(trip = trip, state = state, viewModel = viewModel)
-}
 
 @Stable
-class OutwardActiveScreenState {
+class OutwardActiveFormState {
     var endKm by mutableStateOf("")
     var endPlace by mutableStateOf("")
     var showEditStartTime by mutableStateOf(false)
@@ -53,10 +42,10 @@ class OutwardActiveScreenState {
 }
 
 @Composable
-fun rememberOutwardActiveScreenState(): OutwardActiveScreenState = remember { OutwardActiveScreenState() }
+fun rememberOutwardActiveFormState(): OutwardActiveFormState = remember { OutwardActiveFormState() }
 
 @Composable
-fun OutwardActiveScreenContent(state: OutwardActiveScreenState) {
+fun OutwardActiveFormContent(state: OutwardActiveFormState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,9 +107,9 @@ fun OutwardActiveScreenContent(state: OutwardActiveScreenState) {
 }
 
 @Composable
-fun OutwardActiveScreenPrimaryAction(
+fun OutwardActiveFormPrimaryAction(
     trip: Trip,
-    state: OutwardActiveScreenState,
+    state: OutwardActiveFormState,
     viewModel: HomeViewModel
 ) {
     FilledTonalButton(
@@ -150,9 +139,9 @@ fun OutwardActiveScreenPrimaryAction(
 }
 
 @Composable
-fun OutwardActiveScreenDialogs(
+fun OutwardActiveFormDialogs(
     trip: Trip?,
-    state: OutwardActiveScreenState,
+    state: OutwardActiveFormState,
     viewModel: HomeViewModel
 ) {
     if (trip == null) return

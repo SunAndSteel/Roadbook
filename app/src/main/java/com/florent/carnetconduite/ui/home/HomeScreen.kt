@@ -39,21 +39,15 @@ import com.florent.carnetconduite.ui.home.components.TripSummaryVariant
 import com.florent.carnetconduite.ui.home.mapper.colorsForState
 import com.florent.carnetconduite.ui.home.mapper.findTripForState
 import com.florent.carnetconduite.ui.home.mapper.headerForState
-import com.florent.carnetconduite.ui.home.screens.ArrivedScreenContent
-import com.florent.carnetconduite.ui.home.screens.ArrivedScreenDialogs
-import com.florent.carnetconduite.ui.home.screens.ArrivedScreenPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.CompletedScreenContent
-import com.florent.carnetconduite.ui.home.screens.CompletedScreenPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.IdleScreenContent
-import com.florent.carnetconduite.ui.home.screens.IdleScreenPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveScreenContent
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveScreenDialogs
-import com.florent.carnetconduite.ui.home.screens.OutwardActiveScreenPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveScreenContent
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveScreenDialogs
-import com.florent.carnetconduite.ui.home.screens.ReturnActiveScreenPrimaryAction
-import com.florent.carnetconduite.ui.home.screens.ReturnReadyScreenContent
-import com.florent.carnetconduite.ui.home.screens.ReturnReadyScreenPrimaryAction
+import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionDialogs
+import com.florent.carnetconduite.ui.home.screens.ArrivedDecisionPrimaryAction
+import com.florent.carnetconduite.ui.home.screens.CompletedSummaryPrimaryAction
+import com.florent.carnetconduite.ui.home.screens.IdleFormPrimaryAction
+import com.florent.carnetconduite.ui.home.screens.OutwardActiveFormDialogs
+import com.florent.carnetconduite.ui.home.screens.OutwardActiveFormPrimaryAction
+import com.florent.carnetconduite.ui.home.screens.ReturnActiveFormDialogs
+import com.florent.carnetconduite.ui.home.screens.ReturnActiveFormPrimaryAction
+import com.florent.carnetconduite.ui.home.screens.ReturnReadyFormPrimaryAction
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -164,38 +158,15 @@ fun HomeScreen(
                                     .padding(20.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                // ✅ Un seul écran : on swap juste le bloc “form”
-                                when (state) {
-                                    DrivingState.IDLE -> {
-                                        IdleScreenContent(ui.idle)
-                                    }
-
-                                    DrivingState.OUTWARD_ACTIVE -> {
-                                        // OutwardActive content ne dépend pas de trip (par design actuel)
-                                        OutwardActiveScreenContent(ui.outward)
-                                    }
-
-                                    DrivingState.ARRIVED -> {
-                                        // Arrived content ne dépend pas de trip (par design actuel)
-                                        ArrivedScreenContent()
-                                    }
-
-                                    DrivingState.RETURN_READY -> {
-                                        returnReadyTrip?.let { trip ->
-                                            ReturnReadyScreenContent(trip, ui.returnReady)
-                                        }
-                                    }
-
-                                    DrivingState.RETURN_ACTIVE -> {
-                                        // ReturnActive content ne dépend pas de trip (par design actuel)
-                                        ReturnActiveScreenContent(ui.returnActive)
-                                    }
-
-                                    DrivingState.COMPLETED -> {
-                                        // ✅ On évite la dépendance au VM : on passe la data
-                                        CompletedScreenContent(tripGroups)
-                                    }
-                                }
+                                HomeFormSection(
+                                    drivingState = state,
+                                    ui = ui,
+                                    outwardTrip = outwardTrip,
+                                    arrivedTrip = arrivedTrip,
+                                    returnReadyTrip = returnReadyTrip,
+                                    returnActiveTrip = returnActiveTrip,
+                                    tripGroups = tripGroups
+                                )
                             }
                         }
                     }
@@ -220,39 +191,39 @@ fun HomeScreen(
                     PrimaryActionArea {
                         when (drivingState) {
                             DrivingState.IDLE ->
-                                IdleScreenPrimaryAction(ui.idle, viewModel)
+                                IdleFormPrimaryAction(ui.idle, viewModel)
 
                             DrivingState.OUTWARD_ACTIVE ->
                                 outwardTrip?.let { trip ->
-                                    OutwardActiveScreenPrimaryAction(trip, ui.outward, viewModel)
+                                    OutwardActiveFormPrimaryAction(trip, ui.outward, viewModel)
                                 }
 
                             DrivingState.ARRIVED ->
                                 arrivedTrip?.let { trip ->
-                                    ArrivedScreenPrimaryAction(trip, viewModel)
+                                    ArrivedDecisionPrimaryAction(trip, viewModel)
                                 }
 
                             DrivingState.RETURN_READY ->
                                 returnReadyTrip?.let { trip ->
-                                    ReturnReadyScreenPrimaryAction(trip, ui.returnReady, viewModel)
+                                    ReturnReadyFormPrimaryAction(trip, ui.returnReady, viewModel)
                                 }
 
                             DrivingState.RETURN_ACTIVE ->
                                 returnActiveTrip?.let { trip ->
-                                    ReturnActiveScreenPrimaryAction(trip, ui.returnActive, viewModel)
+                                    ReturnActiveFormPrimaryAction(trip, ui.returnActive, viewModel)
                                 }
 
                             DrivingState.COMPLETED ->
-                                CompletedScreenPrimaryAction()
+                                CompletedSummaryPrimaryAction()
                         }
                     }
                 }
             }
 
             // -------- DIALOGS (overlay) --------
-            OutwardActiveScreenDialogs(outwardTrip, ui.outward, viewModel)
-            ReturnActiveScreenDialogs(returnActiveTrip, ui.returnActive, viewModel)
-            ArrivedScreenDialogs(arrivedTrip, ui.arrived, viewModel)
+            OutwardActiveFormDialogs(outwardTrip, ui.outward, viewModel)
+            ReturnActiveFormDialogs(returnActiveTrip, ui.returnActive, viewModel)
+            ArrivedDecisionDialogs(arrivedTrip, ui.arrived, viewModel)
         }
     }
 }

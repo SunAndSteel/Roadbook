@@ -31,30 +31,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.ui.home.HomeViewModel
-import org.koin.androidx.compose.koinViewModel
-
-@Composable
-fun CompletedScreen(viewModel: HomeViewModel = koinViewModel()) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        CompletedScreenContent(viewModel = viewModel)
-        CompletedScreenPrimaryAction()
-    }
-}
 
 /**
  * Version "prod" branchée sur le ViewModel.
  */
 @Composable
-fun CompletedScreenContent(viewModel: HomeViewModel) {
+fun CompletedSummaryContent(viewModel: HomeViewModel) {
     val tripGroups by viewModel.tripGroups.collectAsState()
-    CompletedScreenContent(tripGroups = tripGroups)
+    CompletedSummaryContent(tripGroups)
 }
 
 /**
  * Version "pure UI" (utile pour @Preview + tests)
  */
 @Composable
-fun CompletedScreenContent(tripGroups: List<TripGroup>) {
+fun CompletedSummaryContent(tripGroups: List<TripGroup>) {
     val completedCount = tripGroups.count { group -> group.isComplete }
     val transitionState = remember { MutableTransitionState(false).apply { targetState = true } }
 
@@ -115,7 +106,7 @@ fun CompletedScreenContent(tripGroups: List<TripGroup>) {
 }
 
 @Composable
-fun CompletedScreenPrimaryAction() {
+fun CompletedSummaryPrimaryAction() {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         FilledTonalButton(
             onClick = {},

@@ -4,7 +4,6 @@ import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.domain.usecases.DeleteTripGroupUseCase
 import com.florent.carnetconduite.domain.usecases.EditTripUseCase
-import com.florent.carnetconduite.domain.utils.NoOpLogger
 import com.florent.carnetconduite.domain.utils.Result
 import com.florent.carnetconduite.repository.TripRepository
 import com.florent.carnetconduite.testutils.MainDispatcherRule
@@ -53,13 +52,13 @@ class HistoryViewModelTest {
         )
         whenever(repository.allTrips).thenReturn(MutableStateFlow(listOf(outward, returnTrip)))
 
-        val viewModel = HistoryViewModel(repository, deleteTripGroupUseCase, editTripUseCase, NoOpLogger())
+        val viewModel = HistoryViewModel(repository, deleteTripGroupUseCase, editTripUseCase)
 
         advanceUntilIdle()
         val stats = viewModel.tripStats.drop(1).first()
         assertThat(stats.totalTrips).isEqualTo(1)
         assertThat(stats.totalKm).isEqualTo(outward.kmsComptabilises + returnTrip.kmsComptabilises)
-        assertThat(stats.totalHours).isEqualTo(1.5)
+        assertThat(stats.totalDurationMs).isEqualTo(5_400_000L)
     }
 
     @Test
@@ -69,7 +68,7 @@ class HistoryViewModelTest {
         whenever(repository.allTrips).thenReturn(MutableStateFlow(listOf(outward)))
         whenever(deleteTripGroupUseCase(group)).thenReturn(Result.success(Unit))
 
-        val viewModel = HistoryViewModel(repository, deleteTripGroupUseCase, editTripUseCase, NoOpLogger())
+        val viewModel = HistoryViewModel(repository, deleteTripGroupUseCase, editTripUseCase)
 
         val eventDeferred = async { viewModel.uiEvent.first() }
 

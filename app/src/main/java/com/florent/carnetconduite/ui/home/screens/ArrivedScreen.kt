@@ -39,31 +39,20 @@ import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.EditKmDialog
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
-import org.koin.androidx.compose.koinViewModel
 import java.time.Duration
 import java.util.Locale
 
-@Composable
-fun ArrivedScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
-    val state = rememberArrivedScreenState()
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ArrivedScreenContent()
-        ArrivedScreenPrimaryAction(trip = trip, viewModel = viewModel)
-    }
-    ArrivedScreenDialogs(trip = trip, state = state, viewModel = viewModel)
-}
-
 @Stable
-class ArrivedScreenState {
+class ArrivedDecisionState {
     var showEditEndTime by mutableStateOf(false)
     var showEditEndKm by mutableStateOf(false)
 }
 
 @Composable
-fun rememberArrivedScreenState(): ArrivedScreenState = remember { ArrivedScreenState() }
+fun rememberArrivedDecisionState(): ArrivedDecisionState = remember { ArrivedDecisionState() }
 
 @Composable
-fun ArrivedScreenContent() {
+fun ArrivedDecisionContent() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,7 +117,7 @@ fun ArrivedScreenContent() {
  * with the summary header.
  */
 @Composable
-fun ArrivedStatsSection(
+fun ArrivedDecisionStatsSection(
     trip: Trip,
     onEditDistance: (() -> Unit)?
 ) {
@@ -207,7 +196,7 @@ fun ArrivedStatsSection(
 }
 
 @Composable
-fun ArrivedScreenPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
+fun ArrivedDecisionPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         FilledTonalButton(
             onClick = { viewModel.prepareReturnTrip(trip.id) },
@@ -250,9 +239,9 @@ fun ArrivedScreenPrimaryAction(trip: Trip, viewModel: HomeViewModel) {
 }
 
 @Composable
-fun ArrivedScreenDialogs(
+fun ArrivedDecisionDialogs(
     trip: Trip?,
-    state: ArrivedScreenState,
+    state: ArrivedDecisionState,
     viewModel: HomeViewModel
 ) {
     if (trip == null) return
