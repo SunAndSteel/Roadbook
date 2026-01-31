@@ -31,30 +31,19 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.home.HomeViewModel
 import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
-import org.koin.androidx.compose.koinViewModel
-
-@Composable
-fun ReturnActiveScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
-    val state = rememberReturnActiveScreenState()
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ReturnActiveScreenContent(state = state)
-        ReturnActiveScreenPrimaryAction(trip = trip, state = state, viewModel = viewModel)
-    }
-    ReturnActiveScreenDialogs(trip = trip, state = state, viewModel = viewModel)
-}
 
 @Stable
-class ReturnActiveScreenState {
+class ReturnActiveFormState {
     var endKm by mutableStateOf("")
     var showEditStartTime by mutableStateOf(false)
     var showEditEndTime by mutableStateOf(false)
 }
 
 @Composable
-fun rememberReturnActiveScreenState(): ReturnActiveScreenState = remember { ReturnActiveScreenState() }
+fun rememberReturnActiveFormState(): ReturnActiveFormState = remember { ReturnActiveFormState() }
 
 @Composable
-fun ReturnActiveScreenContent(state: ReturnActiveScreenState) {
+fun ReturnActiveFormContent(state: ReturnActiveFormState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -96,9 +85,9 @@ fun ReturnActiveScreenContent(state: ReturnActiveScreenState) {
 }
 
 @Composable
-fun ReturnActiveScreenPrimaryAction(
+fun ReturnActiveFormPrimaryAction(
     trip: Trip,
-    state: ReturnActiveScreenState,
+    state: ReturnActiveFormState,
     viewModel: HomeViewModel
 ) {
     FilledTonalButton(
@@ -127,9 +116,9 @@ fun ReturnActiveScreenPrimaryAction(
 }
 
 @Composable
-fun ReturnActiveScreenDialogs(
+fun ReturnActiveFormDialogs(
     trip: Trip?,
-    state: ReturnActiveScreenState,
+    state: ReturnActiveFormState,
     viewModel: HomeViewModel
 ) {
     if (trip == null) return

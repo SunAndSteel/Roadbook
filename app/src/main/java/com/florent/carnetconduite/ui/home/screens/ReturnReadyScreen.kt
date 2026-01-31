@@ -35,27 +35,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.home.HomeViewModel
-import org.koin.androidx.compose.koinViewModel
-
-@Composable
-fun ReturnReadyScreen(trip: Trip, viewModel: HomeViewModel = koinViewModel()) {
-    val state = rememberReturnReadyScreenState()
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ReturnReadyScreenContent(trip = trip, state = state)
-        ReturnReadyScreenPrimaryAction(trip = trip, state = state, viewModel = viewModel)
-    }
-}
 
 @Stable
-class ReturnReadyScreenState {
+class ReturnReadyFormState {
     var editedStartKm by mutableStateOf("")
 }
 
 @Composable
-fun rememberReturnReadyScreenState(): ReturnReadyScreenState = remember { ReturnReadyScreenState() }
+fun rememberReturnReadyFormState(): ReturnReadyFormState = remember { ReturnReadyFormState() }
 
 @Composable
-fun ReturnReadyScreenContent(trip: Trip, state: ReturnReadyScreenState) {
+fun ReturnReadyFormContent(trip: Trip, state: ReturnReadyFormState) {
     if (state.editedStartKm.isEmpty()) {
         state.editedStartKm = trip.startKm.toString()
     }
@@ -120,9 +110,9 @@ fun ReturnReadyScreenContent(trip: Trip, state: ReturnReadyScreenState) {
 }
 
 @Composable
-fun ReturnReadyScreenPrimaryAction(
+fun ReturnReadyFormPrimaryAction(
     trip: Trip,
-    state: ReturnReadyScreenState,
+    state: ReturnReadyFormState,
     viewModel: HomeViewModel
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
