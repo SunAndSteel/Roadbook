@@ -38,6 +38,7 @@ import com.florent.carnetconduite.ui.home.HomeViewModel
 
 @Stable
 class ReturnReadyFormState {
+    // Kilométrage proposé pour le départ du retour.
     var editedStartKm by mutableStateOf("")
 }
 
@@ -46,6 +47,7 @@ fun rememberReturnReadyFormState(): ReturnReadyFormState = remember { ReturnRead
 
 @Composable
 fun ReturnReadyFormContent(trip: Trip, state: ReturnReadyFormState) {
+    // Formulaire pour confirmer le démarrage du retour.
     if (state.editedStartKm.isEmpty()) {
         state.editedStartKm = trip.startKm.toString()
     }

@@ -29,15 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
-import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.UiEvent
 import com.florent.carnetconduite.ui.home.components.StickyBottomArea
+import com.florent.carnetconduite.ui.home.components.TripHeaderCompact
 import com.florent.carnetconduite.ui.home.components.TripSummaryHeader
 import com.florent.carnetconduite.ui.home.components.TripSummaryVariant
 import com.florent.carnetconduite.ui.home.mapper.colorsForState
 import com.florent.carnetconduite.ui.home.mapper.findTripForState
 import com.florent.carnetconduite.ui.home.mapper.headerForState
-import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionState
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionDialogs
 import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormDialogs
 import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormDialogs
 import org.koin.androidx.compose.koinViewModel
@@ -55,7 +55,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
 
-    // ✅ état UI unifié (contient aussi les inputs “arrivée” maintenant)
+    // État UI unifié (inclut les champs d'arrivée et les flags de dialogues).
     val ui = rememberHomeUnifiedState()
 
     LaunchedEffect(Unit) {
@@ -85,7 +85,7 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-        // Bottom nav (~80dp) + sticky (card arrivée + CTA)
+        // Réserve l'espace pour la bottom bar et la zone sticky.
         val reservedBottom = 80.dp + when (drivingState) {
             DrivingState.ARRIVED -> 230.dp
             else -> 120.dp
@@ -119,8 +119,8 @@ fun HomeScreen(
                         state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE
 
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // ✅ TripHeader en haut (statut = un seul endroit)
-                        TripHeader(
+                        // Entête principal (statut unique).
+                        TripHeaderCompact(
                             header,
                             colors.statusColor,
                             colors.headerContainer,
@@ -128,7 +128,7 @@ fun HomeScreen(
                             showActiveIndicator
                         )
 
-                        // ✅ Résumé en haut, sans “Actif” dupliqué
+                        // Résumé compact sans duplication du statut.
                         if (headerTrip != null && state != DrivingState.COMPLETED) {
                             TripSummaryHeader(
                                 trip = headerTrip,
@@ -159,7 +159,7 @@ fun HomeScreen(
                                     returnReadyTrip = returnReadyTrip,
                                     returnActiveTrip = returnActiveTrip,
                                     tripGroups = tripGroups,
-                                    // ✅ Les inputs “arrivée” ne doivent PLUS être dans le form
+                                    // Les champs d'arrivée restent dans la zone sticky.
                                     showArrivalInputsInForm = false
                                 )
                             }
@@ -186,9 +186,4 @@ fun HomeScreen(
             ArrivedDecisionDialogs(arrivedTrip, ui.arrived, viewModel)
         }
     }
-}
-
-@Composable
-fun ArrivedDecisionDialogs(x0: Trip?, x1: ArrivedDecisionState, x2: HomeViewModel) {
-    TODO("Not yet implemented")
 }

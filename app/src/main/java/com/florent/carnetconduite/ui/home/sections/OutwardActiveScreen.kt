@@ -35,6 +35,7 @@ import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 
 @Stable
 class OutwardActiveFormState {
+    // Champs d'arrivée pour clôturer l'aller.
     var endKm by mutableStateOf("")
     var endPlace by mutableStateOf("")
     var showEditStartTime by mutableStateOf(false)
@@ -46,6 +47,7 @@ fun rememberOutwardActiveFormState(): OutwardActiveFormState = remember { Outwar
 
 @Composable
 fun OutwardActiveFormContent(state: OutwardActiveFormState) {
+    // Formulaire d'arrivée du trajet aller.
     Column(
         modifier = Modifier
             .fillMaxWidth()

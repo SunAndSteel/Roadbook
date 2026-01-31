@@ -38,6 +38,7 @@ fun TripSummaryHeader(
     showEditButton: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // Résumé compact du trajet, utilisé en haut de l'écran Home.
     when (variant) {
         TripSummaryVariant.Minimal -> TripSummaryMinimal(
             trip = trip,

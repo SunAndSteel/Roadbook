@@ -22,6 +22,7 @@ internal data class StepColors(
     val cardContainer: Color
 )
 
+// Associe un état de conduite à son entête visuel.
 internal fun headerForState(state: DrivingState): TripHeaderData {
     return when (state) {
         DrivingState.IDLE -> TripHeaderData(
@@ -65,6 +66,7 @@ internal fun headerForState(state: DrivingState): TripHeaderData {
 
 @Composable
 internal fun colorsForState(state: DrivingState): StepColors {
+    // Palette adaptée à chaque étape du parcours utilisateur.
     val scheme = MaterialTheme.colorScheme
     return when (state) {
         DrivingState.IDLE -> StepColors(

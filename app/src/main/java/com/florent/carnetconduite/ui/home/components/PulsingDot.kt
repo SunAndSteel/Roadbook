@@ -22,6 +22,7 @@ internal fun PulsingDot(
     color: Color,
     modifier: Modifier = Modifier
 ) {
+    // Indicateur animé pour un état "actif".
     val transition = rememberInfiniteTransition(label = "ActiveIndicator")
     val scale by transition.animateFloat(
         initialValue = 0.8f,

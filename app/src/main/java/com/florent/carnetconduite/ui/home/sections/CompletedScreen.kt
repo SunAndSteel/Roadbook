@@ -21,8 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,20 +28,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.domain.models.TripGroup
-import com.florent.carnetconduite.ui.home.HomeViewModel
 
-/**
- * Version "prod" branchée sur le ViewModel.
- */
-@Composable
-fun CompletedSummaryContent(viewModel: HomeViewModel) {
-    val tripGroups by viewModel.tripGroups.collectAsState()
-    CompletedSummaryContent(tripGroups)
-}
-
-/**
- * Version "pure UI" (utile pour @Preview + tests)
- */
+// Résumé final affiché après la clôture du trajet.
 @Composable
 fun CompletedSummaryContent(tripGroups: List<TripGroup>) {
     val completedCount = tripGroups.count { group -> group.isComplete }

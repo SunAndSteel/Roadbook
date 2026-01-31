@@ -1,55 +1,34 @@
 package com.florent.carnetconduite.ui.home
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.florent.carnetconduite.ui.home.sections.IdleFormState
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormState
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormState
+import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormState
 
 @Composable
 fun rememberHomeUnifiedState(): HomeUnifiedState = remember { HomeUnifiedState() }
 
-@Stable
+// État centralisé pour l'écran Home (un seul point de vérité côté UI).
 class HomeUnifiedState {
-    val idle = IdleUiState()
-    val outward = OutwardUiState()
+    // Les états de formulaire sont partagés entre sections et actions sticky.
+    val idle = IdleFormState()
+    val outward = OutwardActiveFormState()
     val arrived = ArrivedUiState()
-    val returnReady = ReturnReadyUiState()
-    val returnActive = ReturnActiveUiState()
+    val returnReady = ReturnReadyFormState()
+    val returnActive = ReturnActiveFormState()
 }
 
-@Stable
-class IdleUiState {
-    // garde tes champs existants si tu en as
-}
-
-@Stable
-class OutwardUiState {
-    // garde tes champs existants + tes flags de dialogs
-    var showEditStartTime by mutableStateOf(false)
-    var showEditEndTime by mutableStateOf(false)
-}
-
-@Stable
 class ArrivedUiState {
-    // ✅ Inputs ARRIVÉE (sticky bottom)
+    // Champs saisis par l'utilisateur pour l'arrivée (sticky ou formulaire).
     var endKmText by mutableStateOf("")
     var arrivalPlace by mutableStateOf("")
 
-    // flags dialogs existants
+    // Flags de dialogues d'édition (heure/km).
     var showEditEndKm by mutableStateOf(false)
-    var showEditEndTime by mutableStateOf(false)
-}
-
-@Stable
-class ReturnReadyUiState {
-    // garde tes champs existants si tu en as
-}
-
-@Stable
-class ReturnActiveUiState {
-    // garde tes champs existants + flags dialogs
-    var showEditStartTime by mutableStateOf(false)
     var showEditEndTime by mutableStateOf(false)
 }
