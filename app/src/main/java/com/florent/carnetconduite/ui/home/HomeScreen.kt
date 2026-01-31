@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,7 +20,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,25 +29,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
+import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.ui.UiEvent
-import com.florent.carnetconduite.ui.home.components.PrimaryActionArea
-import com.florent.carnetconduite.ui.home.components.TripHeaderCompact
-import com.florent.carnetconduite.ui.home.components.TripSummaryEdit
+import com.florent.carnetconduite.ui.home.components.StickyBottomArea
 import com.florent.carnetconduite.ui.home.components.TripSummaryHeader
 import com.florent.carnetconduite.ui.home.components.TripSummaryVariant
 import com.florent.carnetconduite.ui.home.mapper.colorsForState
 import com.florent.carnetconduite.ui.home.mapper.findTripForState
 import com.florent.carnetconduite.ui.home.mapper.headerForState
-import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionDialogs
-import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionPrimaryAction
-import com.florent.carnetconduite.ui.home.sections.CompletedSummaryPrimaryAction
-import com.florent.carnetconduite.ui.home.sections.IdleFormPrimaryAction
+import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionState
 import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormDialogs
-import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormPrimaryAction
 import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormDialogs
-import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormPrimaryAction
-import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormPrimaryAction
-import com.florent.carnetconduite.util.formatTime
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -65,6 +55,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
 
+    // ✅ état UI unifié (contient aussi les inputs “arrivée” maintenant)
     val ui = rememberHomeUnifiedState()
 
     LaunchedEffect(Unit) {
@@ -94,14 +85,18 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-        val reservedBottom = 84.dp + 170.dp
+        // Bottom nav (~80dp) + sticky (card arrivée + CTA)
+        val reservedBottom = 80.dp + when (drivingState) {
+            DrivingState.ARRIVED -> 230.dp
+            else -> 120.dp
+        }
 
         Box(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // ----- CONTENU : juste le form -----
+            // -------- CONTENU SCROLLABLE --------
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -118,109 +113,74 @@ fun HomeScreen(
                     },
                     label = "HomeUnifiedTransition"
                 ) { state ->
+                    val header = headerForState(state)
                     val colors = colorsForState(state)
+                    val showActiveIndicator =
+                        state == DrivingState.OUTWARD_ACTIVE || state == DrivingState.RETURN_ACTIVE
 
-                    ElevatedCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.elevatedCardColors(containerColor = colors.cardContainer),
-                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            HomeFormSection(
-                                drivingState = state,
-                                ui = ui,
-                                outwardTrip = outwardTrip,
-                                arrivedTrip = arrivedTrip,
-                                returnReadyTrip = returnReadyTrip,
-                                returnActiveTrip = returnActiveTrip,
-                                tripGroups = tripGroups
-                            )
-                        }
-                    }
-                }
-            }
-
-            // ----- BOTTOM BAR : header + summary + CTA -----
-            val header = headerForState(drivingState)
-            val colors = colorsForState(drivingState)
-            val showActiveIndicator =
-                drivingState == DrivingState.OUTWARD_ACTIVE || drivingState == DrivingState.RETURN_ACTIVE
-
-            Surface(
-                tonalElevation = 3.dp,
-                shadowElevation = 10.dp,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    TripHeaderCompact(
-                        header = header,
-                        statusColor = colors.statusColor,
-                        containerColor = colors.headerContainer,
-                        onContainerColor = colors.onHeaderContainer,
-                        showActiveIndicator = showActiveIndicator
-                    )
-
-                    if (headerTrip != null && drivingState != DrivingState.COMPLETED) {
-                        TripSummaryHeader(
-                            trip = headerTrip,
-                            variant = TripSummaryVariant.Sticky,
-                            statusLabel = header.statusLabel,
-                            statusColor = colors.statusColor,
-                            showDistance = false,
-                            edit = editForState(
-                                state = drivingState,
-                                trip = headerTrip,
-                                ui = ui
-                            )
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // ✅ TripHeader en haut (statut = un seul endroit)
+                        TripHeader(
+                            header,
+                            colors.statusColor,
+                            colors.headerContainer,
+                            colors.onHeaderContainer,
+                            showActiveIndicator
                         )
-                    }
 
-                    PrimaryActionArea {
-                        when (drivingState) {
-                            DrivingState.IDLE ->
-                                IdleFormPrimaryAction(ui.idle, viewModel)
+                        // ✅ Résumé en haut, sans “Actif” dupliqué
+                        if (headerTrip != null && state != DrivingState.COMPLETED) {
+                            TripSummaryHeader(
+                                trip = headerTrip,
+                                variant = TripSummaryVariant.Minimal,
+                                statusLabel = header.statusLabel,
+                                statusColor = colors.statusColor,
+                                showStatusChip = false,   // <-- plus de double actif
+                                showEditButton = false    // <-- plus de “heure d’arrivée” près du CTA
+                            )
+                        }
 
-                            DrivingState.OUTWARD_ACTIVE ->
-                                outwardTrip?.let { trip ->
-                                    OutwardActiveFormPrimaryAction(trip, ui.outward, viewModel)
-                                }
-
-                            DrivingState.ARRIVED ->
-                                arrivedTrip?.let { trip ->
-                                    ArrivedDecisionPrimaryAction(trip, viewModel)
-                                }
-
-                            DrivingState.RETURN_READY ->
-                                returnReadyTrip?.let { trip ->
-                                    ReturnReadyFormPrimaryAction(trip, ui.returnReady, viewModel)
-                                }
-
-                            DrivingState.RETURN_ACTIVE ->
-                                returnActiveTrip?.let { trip ->
-                                    ReturnActiveFormPrimaryAction(trip, ui.returnActive, viewModel)
-                                }
-
-                            DrivingState.COMPLETED ->
-                                CompletedSummaryPrimaryAction()
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.elevatedCardColors(containerColor = colors.cardContainer),
+                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                HomeFormSection(
+                                    drivingState = state,
+                                    ui = ui,
+                                    outwardTrip = outwardTrip,
+                                    arrivedTrip = arrivedTrip,
+                                    returnReadyTrip = returnReadyTrip,
+                                    returnActiveTrip = returnActiveTrip,
+                                    tripGroups = tripGroups,
+                                    // ✅ Les inputs “arrivée” ne doivent PLUS être dans le form
+                                    showArrivalInputsInForm = false
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            // ----- DIALOGS -----
+            // -------- STICKY BOTTOM UNIQUE --------
+            StickyBottomArea(
+                drivingState = drivingState,
+                outwardTrip = outwardTrip,
+                arrivedTrip = arrivedTrip,
+                returnReadyTrip = returnReadyTrip,
+                returnActiveTrip = returnActiveTrip,
+                ui = ui,
+                viewModel = viewModel,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+
+            // -------- DIALOGS --------
             OutwardActiveFormDialogs(outwardTrip, ui.outward, viewModel)
             ReturnActiveFormDialogs(returnActiveTrip, ui.returnActive, viewModel)
             ArrivedDecisionDialogs(arrivedTrip, ui.arrived, viewModel)
@@ -228,51 +188,7 @@ fun HomeScreen(
     }
 }
 
-/**
- * ✅ Un seul champ éditable pertinent.
- * ⚠️ Remplace les 3 lignes "ui.xxx.____ = true" par TES noms exacts.
- */
 @Composable
-private fun editForState(
-    state: DrivingState,
-    trip: com.florent.carnetconduite.data.Trip,
-    ui: HomeUnifiedState
-): TripSummaryEdit? {
-    return when (state) {
-        DrivingState.OUTWARD_ACTIVE -> {
-            // Exemple : éditer heure d’arrivée prévue / réelle (selon ton UX)
-            TripSummaryEdit(
-                label = "Heure d’arrivée",
-                value = if ((trip.endTime ?: 0L) > 0L) formatTime(trip.endTime!!) else "—",
-                onEdit = {
-                    // TODO: remplace par ton flag réel
-                    // ui.outward.showEditEndTime = true
-                }
-            )
-        }
-
-        DrivingState.ARRIVED -> {
-            TripSummaryEdit(
-                label = "Km d’arrivée",
-                value = (trip.endKm?.toString() ?: "—"),
-                onEdit = {
-                    // TODO: remplace par ton flag réel
-                    // ui.arrived.showEditEndKm = true
-                }
-            )
-        }
-
-        DrivingState.RETURN_ACTIVE -> {
-            TripSummaryEdit(
-                label = "Heure d’arrivée",
-                value = if ((trip.endTime ?: 0L) > 0L) formatTime(trip.endTime!!) else "—",
-                onEdit = {
-                    // TODO: remplace par ton flag réel
-                    // ui.returnActive.showEditEndTime = true
-                }
-            )
-        }
-
-        else -> null
-    }
+fun ArrivedDecisionDialogs(x0: Trip?, x1: ArrivedDecisionState, x2: HomeViewModel) {
+    TODO("Not yet implemented")
 }

@@ -3,24 +3,21 @@ package com.florent.carnetconduite.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
-import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionContent
-import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionStatsSection
-import com.florent.carnetconduite.ui.home.sections.CompletedSummaryContent
-import com.florent.carnetconduite.ui.home.sections.IdleFormContent
-import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormContent
-import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormContent
-import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormContent
+import com.florent.carnetconduite.ui.home.sections.ArrivedScreen
+import com.florent.carnetconduite.ui.home.sections.CompletedScreen
+import com.florent.carnetconduite.ui.home.sections.IdleScreen
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveScreen
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveScreen
+import com.florent.carnetconduite.ui.home.sections.ReturnReadyScreen
 
-/**
- * Une seule section “Form” qui change selon DrivingState.
- * Le layout parent (header/summary/cta sticky) reste stable.
- */
 @Composable
 fun HomeFormSection(
     drivingState: DrivingState,
@@ -29,7 +26,8 @@ fun HomeFormSection(
     arrivedTrip: Trip?,
     returnReadyTrip: Trip?,
     returnActiveTrip: Trip?,
-    tripGroups: List<TripGroup>
+    tripGroups: List<TripGroup>,
+    showArrivalInputsInForm: Boolean = true
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -37,42 +35,40 @@ fun HomeFormSection(
     ) {
         when (drivingState) {
             DrivingState.IDLE -> {
-                IdleFormContent(ui.idle)
+                IdleScreen.Content(ui.idle)
             }
 
             DrivingState.OUTWARD_ACTIVE -> {
-                // Ton design actuel : content = state only
-                OutwardActiveFormContent(ui.outward)
+                // Ton contenu “trajet en cours” sans le bloc d’arrivée
+                OutwardActiveScreen.Content(ui.outward)
             }
 
             DrivingState.ARRIVED -> {
-                // Ton ArrivedDecisionContent() est “stateless” (UI texte)
-                ArrivedDecisionContent()
+                // On garde la logique “décision” ici, mais PAS les inputs km/lieu si on les a déplacés
+                ArrivedScreen.Content(
+                    state = ui.arrived,
+                    showArrivalInputs = showArrivalInputsInForm
+                )
 
-                // Mais pour unifier et rendre ça utile: on ajoute les stats ici,
-                // et on branche l'édition vers les dialogs via ui.arrived.
-                arrivedTrip?.let { trip ->
-                    ArrivedDecisionStatsSection(
-                        trip = trip,
-                        onEditDistance = { ui.arrived.showEditEndKm = true }
+                if (!showArrivalInputsInForm) {
+                    Text(
+                        text = "Les infos d’arrivée se complètent en bas, juste avant de terminer le trajet.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // Optionnel : si tu veux aussi éditer l’heure d’arrivée depuis la section:
-                    // ui.arrived.showEditEndTime = true
                 }
             }
 
             DrivingState.RETURN_READY -> {
-                returnReadyTrip?.let { trip ->
-                    ReturnReadyFormContent(trip, ui.returnReady)
-                }
+                ReturnReadyScreen.Content(ui.returnReady)
             }
 
             DrivingState.RETURN_ACTIVE -> {
-                ReturnActiveFormContent(ui.returnActive)
+                ReturnActiveScreen.Content(ui.returnActive)
             }
 
             DrivingState.COMPLETED -> {
-                CompletedSummaryContent(tripGroups)
+                CompletedScreen.Content(tripGroups)
             }
         }
     }

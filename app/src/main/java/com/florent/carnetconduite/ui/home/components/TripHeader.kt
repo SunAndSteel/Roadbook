@@ -1,4 +1,3 @@
-// app/src/main/java/com/florent/carnetconduite/ui/home/components/TripHeader.kt
 package com.florent.carnetconduite.ui.home.components
 
 import androidx.compose.foundation.layout.Arrangement

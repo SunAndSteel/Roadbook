@@ -2,33 +2,54 @@ package com.florent.carnetconduite.ui.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import com.florent.carnetconduite.ui.home.sections.ArrivedDecisionState
-import com.florent.carnetconduite.ui.home.sections.IdleFormState
-import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormState
-import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormState
-import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormState
-import com.florent.carnetconduite.ui.home.sections.rememberArrivedDecisionState
-import com.florent.carnetconduite.ui.home.sections.rememberIdleFormState
-import com.florent.carnetconduite.ui.home.sections.rememberOutwardActiveFormState
-import com.florent.carnetconduite.ui.home.sections.rememberReturnActiveFormState
-import com.florent.carnetconduite.ui.home.sections.rememberReturnReadyFormState
-
-@Stable
-data class HomeUnifiedState(
-    val idle: IdleFormState,
-    val outward: OutwardActiveFormState,
-    val arrived: ArrivedDecisionState,
-    val returnReady: ReturnReadyFormState,
-    val returnActive: ReturnActiveFormState
-)
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
-fun rememberHomeUnifiedState(): HomeUnifiedState {
-    return HomeUnifiedState(
-        idle = rememberIdleFormState(),
-        outward = rememberOutwardActiveFormState(),
-        arrived = rememberArrivedDecisionState(),
-        returnReady = rememberReturnReadyFormState(),
-        returnActive = rememberReturnActiveFormState()
-    )
+fun rememberHomeUnifiedState(): HomeUnifiedState = remember { HomeUnifiedState() }
+
+@Stable
+class HomeUnifiedState {
+    val idle = IdleUiState()
+    val outward = OutwardUiState()
+    val arrived = ArrivedUiState()
+    val returnReady = ReturnReadyUiState()
+    val returnActive = ReturnActiveUiState()
+}
+
+@Stable
+class IdleUiState {
+    // garde tes champs existants si tu en as
+}
+
+@Stable
+class OutwardUiState {
+    // garde tes champs existants + tes flags de dialogs
+    var showEditStartTime by mutableStateOf(false)
+    var showEditEndTime by mutableStateOf(false)
+}
+
+@Stable
+class ArrivedUiState {
+    // ✅ Inputs ARRIVÉE (sticky bottom)
+    var endKmText by mutableStateOf("")
+    var arrivalPlace by mutableStateOf("")
+
+    // flags dialogs existants
+    var showEditEndKm by mutableStateOf(false)
+    var showEditEndTime by mutableStateOf(false)
+}
+
+@Stable
+class ReturnReadyUiState {
+    // garde tes champs existants si tu en as
+}
+
+@Stable
+class ReturnActiveUiState {
+    // garde tes champs existants + flags dialogs
+    var showEditStartTime by mutableStateOf(false)
+    var showEditEndTime by mutableStateOf(false)
 }
