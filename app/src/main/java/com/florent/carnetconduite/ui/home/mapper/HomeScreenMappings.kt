@@ -1,10 +1,10 @@
 package com.florent.carnetconduite.ui.home.mapper
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardReturn
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.Flag
-import androidx.compose.material.icons.rounded.KeyboardReturn
 import androidx.compose.material.icons.rounded.UTurnLeft
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,7 +14,7 @@ import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripStatus
 import com.florent.carnetconduite.ui.home.components.TripHeaderData
 
-internal data class StepColors(
+internal data class HomeStepColors(
     val headerContainer: Color,
     val onHeaderContainer: Color,
     val statusColor: Color,
@@ -22,7 +22,7 @@ internal data class StepColors(
 )
 
 // Associe un état de conduite à son entête visuel.
-internal fun headerForState(state: DrivingState): TripHeaderData {
+internal fun headerForDrivingState(state: DrivingState): TripHeaderData {
     return when (state) {
         DrivingState.IDLE -> TripHeaderData(
             icon = Icons.Rounded.DirectionsCar,
@@ -49,7 +49,7 @@ internal fun headerForState(state: DrivingState): TripHeaderData {
             statusLabel = "Prêt"
         )
         DrivingState.RETURN_ACTIVE -> TripHeaderData(
-            icon = Icons.Rounded.KeyboardReturn,
+            icon = Icons.AutoMirrored.Rounded.KeyboardReturn,
             title = "Retour en cours",
             subtitle = "Trajet retour",
             statusLabel = "Actif"
@@ -64,41 +64,41 @@ internal fun headerForState(state: DrivingState): TripHeaderData {
 }
 
 @Composable
-internal fun colorsForState(state: DrivingState): StepColors {
+internal fun colorsForDrivingState(state: DrivingState): HomeStepColors {
     // Palette adaptée à chaque étape du parcours utilisateur.
     val scheme = MaterialTheme.colorScheme
     return when (state) {
-        DrivingState.IDLE -> StepColors(
+        DrivingState.IDLE -> HomeStepColors(
             headerContainer = scheme.primaryContainer,
             onHeaderContainer = scheme.onPrimaryContainer,
             statusColor = scheme.primary,
             cardContainer = scheme.surface
         )
-        DrivingState.OUTWARD_ACTIVE -> StepColors(
+        DrivingState.OUTWARD_ACTIVE -> HomeStepColors(
             headerContainer = scheme.secondaryContainer,
             onHeaderContainer = scheme.onSecondaryContainer,
             statusColor = scheme.secondary,
             cardContainer = scheme.surface
         )
-        DrivingState.ARRIVED -> StepColors(
+        DrivingState.ARRIVED -> HomeStepColors(
             headerContainer = scheme.secondaryContainer,
             onHeaderContainer = scheme.onSecondaryContainer,
             statusColor = scheme.secondary,
             cardContainer = scheme.surface
         )
-        DrivingState.RETURN_READY -> StepColors(
+        DrivingState.RETURN_READY -> HomeStepColors(
             headerContainer = scheme.primaryContainer,
             onHeaderContainer = scheme.onPrimaryContainer,
             statusColor = scheme.primary,
             cardContainer = scheme.surface
         )
-        DrivingState.RETURN_ACTIVE -> StepColors(
+        DrivingState.RETURN_ACTIVE -> HomeStepColors(
             headerContainer = scheme.tertiaryContainer,
             onHeaderContainer = scheme.onTertiaryContainer,
             statusColor = scheme.tertiary,
             cardContainer = scheme.surface
         )
-        DrivingState.COMPLETED -> StepColors(
+        DrivingState.COMPLETED -> HomeStepColors(
             headerContainer = scheme.surfaceVariant,
             onHeaderContainer = scheme.onSurfaceVariant,
             statusColor = scheme.primary,
@@ -107,7 +107,7 @@ internal fun colorsForState(state: DrivingState): StepColors {
     }
 }
 
-internal fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
+internal fun findTripForDrivingState(state: DrivingState, trips: List<Trip>): Trip? {
     return when (state) {
         DrivingState.OUTWARD_ACTIVE -> trips.find { trip ->
             !trip.isReturn && trip.endKm == null && trip.status == TripStatus.ACTIVE
@@ -137,4 +137,3 @@ internal fun findTripForState(state: DrivingState, trips: List<Trip>): Trip? {
         else -> null
     }
 }
-

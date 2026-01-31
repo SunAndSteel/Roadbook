@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
-import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
 import com.florent.carnetconduite.ui.home.sections.ArrivedFormContent
 import com.florent.carnetconduite.ui.home.sections.CompletedSummaryContent
@@ -21,11 +20,8 @@ import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormContent
 @Composable
 fun HomeFormSection(
     drivingState: DrivingState,
-    ui: HomeUnifiedState,
-    outwardTrip: Trip?,
-    arrivedTrip: Trip?,
-    returnReadyTrip: Trip?,
-    returnActiveTrip: Trip?,
+    ui: HomeUiState,
+    tripSnapshot: HomeTripSnapshot,
     tripGroups: List<TripGroup>,
     showArrivalInputsInForm: Boolean = true
 ) {
@@ -47,7 +43,7 @@ fun HomeFormSection(
             DrivingState.ARRIVED -> {
                 // Décision du trajet retour + info d'arrivée (selon l'emplacement choisi).
                 ArrivedFormContent(
-                    state = ui.arrived,
+                    state = ui.arrival,
                     showArrivalInputs = showArrivalInputsInForm
                 )
 
@@ -62,7 +58,7 @@ fun HomeFormSection(
 
             DrivingState.RETURN_READY -> {
                 // Préparation du retour.
-                returnReadyTrip?.let { trip ->
+                tripSnapshot.returnReady?.let { trip ->
                     ReturnReadyFormContent(trip, ui.returnReady)
                 }
             }

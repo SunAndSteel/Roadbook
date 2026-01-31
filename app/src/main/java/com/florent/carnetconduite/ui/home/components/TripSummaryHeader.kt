@@ -35,7 +35,6 @@ fun TripSummaryHeader(
     statusLabel: String,
     statusColor: Color,
     showStatusChip: Boolean,
-    showEditButton: Boolean,
     modifier: Modifier = Modifier
 ) {
     // Résumé compact du trajet, utilisé en haut de l'écran Home.

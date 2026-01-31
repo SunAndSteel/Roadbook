@@ -24,22 +24,20 @@ internal fun PulsingDot(
 ) {
     // Indicateur animé pour un état "actif".
     val transition = rememberInfiniteTransition(label = "ActiveIndicator")
+    val pulseSpec = infiniteRepeatable<Float>(
+        animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
+        repeatMode = RepeatMode.Reverse
+    )
     val scale by transition.animateFloat(
         initialValue = 0.8f,
         targetValue = 1.3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
+        animationSpec = pulseSpec,
         label = "ActiveIndicatorScale"
     )
     val alpha by transition.animateFloat(
         initialValue = 0.5f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
+        animationSpec = pulseSpec,
         label = "ActiveIndicatorAlpha"
     )
 

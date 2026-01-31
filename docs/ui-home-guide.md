@@ -16,7 +16,7 @@ Les fichiers principaux sont :
 
 - `HomeScreen.kt` : composition globale de l’écran et orchestration UI.
 - `HomeViewModel.kt` : logique d’état, transitions et actions utilisateur.
-- `HomeUnifiedState.kt` : état UI local (champs de formulaires + flags de dialogues).
+- `HomeUiState.kt` : état UI local (champs de formulaires + flags de dialogues).
 - Dossiers `sections/` et `components/` : composables réutilisables.
 
 ---
@@ -67,16 +67,16 @@ L’UI affiche **une section différente** selon cet état :
 - `RETURN_ACTIVE` : fin du retour.
 - `COMPLETED` : écran de confirmation.
 
-### 3.2 État UI local : `HomeUnifiedState`
+### 3.2 État UI local : `HomeUiState`
 
-L’UI a besoin d’**états locaux** (texte saisi, cases ouvertes, dialogues). On les centralise dans `HomeUnifiedState` :
+L’UI a besoin d’**états locaux** (texte saisi, cases ouvertes, dialogues). On les centralise dans `HomeUiState` :
 
 - `IdleFormState` : champs de départ (`startKm`, `startPlace`, etc.).
 - `OutwardActiveFormState` : champs d’arrivée aller (`endKm`, `endPlace`).
-- `ArrivedUiState` : champs d’arrivée (sticky) + flags de dialogs.
+- `ArrivalInputsState` : champs d’arrivée (sticky) + flags de dialogs.
 - `ReturnReadyFormState`, `ReturnActiveFormState` : champs de retour.
 
-Cet état est créé par `rememberHomeUnifiedState()` dans `HomeScreen` et passé aux sections.
+Cet état est créé par `rememberHomeUiState()` dans `HomeScreen` et passé aux sections.
 
 ---
 
@@ -90,19 +90,23 @@ Cet état est créé par `rememberHomeUnifiedState()` dans `HomeScreen` et pass�
    - `drivingState`, `trips`, `tripGroups` via `collectAsState()`.
 
 2. **Choisir le contenu** :
-   - Le contenu central est un `Column` scrollable.
-   - Chaque état appelle un composable de `sections/`.
+   - Les trajets actifs sont regroupés via `HomeTripSnapshot` pour éviter les duplications.
+   - Le contenu central est rendu par `HomeScrollableContent`, un `Column` scrollable.
+   - Chaque état appelle un composable de `sections/` via `HomeFormSection`.
 
 3. **Afficher la zone sticky** :
    - `StickyBottomArea` affiche un CTA principal adapté à l’état.
    - En mode `ARRIVED`, elle affiche aussi un petit formulaire d’arrivée en bas.
 
+`HomeScreen` délègue aussi :
+- `HomeDialogs` pour centraliser l’affichage des dialogues d’édition.
+
 ### 4.2 En-tête dynamique (header)
 
 Le header est piloté par :
 
-- `headerForState()` : texte + icône selon l’état.
-- `colorsForState()` : palette adaptée à l’étape.
+- `headerForDrivingState()` : texte + icône selon l’état.
+- `colorsForDrivingState()` : palette adaptée à l’étape.
 
 Le résultat est rendu par `TripHeaderCompact()`.
 
@@ -164,7 +168,7 @@ Chaque dialogue applique une modification via `HomeViewModel.edit...()`.
 
 - `HomeViewModel.kt`
   - API d’intentions et gestion des erreurs.
-- `HomeUnifiedState.kt`
+- `HomeUiState.kt`
   - État local des formulaires et dialogues.
 
 ### Mapping visuel
@@ -210,7 +214,7 @@ Chaque étape correspond à un composable spécifique et un CTA dans la sticky a
 
 - `HomeScreen.kt` (composition générale)
 - `HomeViewModel.kt` (logique + intents)
-- `HomeUnifiedState.kt` (état UI local)
+- `HomeUiState.kt` (état UI local)
 - `ui/home/sections/*` (écrans par état)
 - `ui/home/components/*` (briques UI)
 - `HomeScreenMappings.kt` (mapping visuel)
