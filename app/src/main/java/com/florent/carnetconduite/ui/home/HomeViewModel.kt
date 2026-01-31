@@ -78,6 +78,7 @@ class HomeViewModel(
             initialValue = null
         )
 
+    // Petit latch pour afficher l'état "COMPLETED" sans effet de bord sur la data.
     private val completionLatch = MutableStateFlow(false)
 
     val drivingState: StateFlow<DrivingState> = trips

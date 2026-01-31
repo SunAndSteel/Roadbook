@@ -34,6 +34,7 @@ import com.florent.carnetconduite.ui.shared.dialogs.TimePickerDialog
 
 @Stable
 class ReturnActiveFormState {
+    // Champs de fin du retour.
     var endKm by mutableStateOf("")
     var showEditStartTime by mutableStateOf(false)
     var showEditEndTime by mutableStateOf(false)
@@ -44,6 +45,7 @@ fun rememberReturnActiveFormState(): ReturnActiveFormState = remember { ReturnAc
 
 @Composable
 fun ReturnActiveFormContent(state: ReturnActiveFormState) {
+    // Formulaire de clôture du retour.
     Column(
         modifier = Modifier
             .fillMaxWidth()

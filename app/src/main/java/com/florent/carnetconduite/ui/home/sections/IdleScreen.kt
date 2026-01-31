@@ -46,6 +46,7 @@ import com.florent.carnetconduite.ui.home.HomeViewModel
 
 @Stable
 class IdleFormState {
+    // Champs de départ saisis par l'utilisateur.
     var startKm by mutableStateOf("")
     var startPlace by mutableStateOf("")
     var conditions by mutableStateOf("")
@@ -60,6 +61,7 @@ fun rememberIdleFormState(): IdleFormState = remember { IdleFormState() }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IdleFormContent(state: IdleFormState) {
+    // Formulaire de préparation du trajet aller.
     Column(
         modifier = Modifier
             .fillMaxWidth()

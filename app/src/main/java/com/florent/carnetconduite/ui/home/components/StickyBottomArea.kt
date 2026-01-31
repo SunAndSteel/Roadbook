@@ -52,7 +52,7 @@ fun StickyBottomArea(
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // ✅ Pendant ARRIVED : carte “kilométrage + lieu” collée au CTA
+            // Pendant ARRIVED : champs d'arrivée collés au CTA.
             if (drivingState == DrivingState.ARRIVED) {
                 ArrivalInputsCard(
                     endKmText = ui.arrived.endKmText,
@@ -65,7 +65,7 @@ fun StickyBottomArea(
             PrimaryActionArea {
                 when (drivingState) {
                     DrivingState.IDLE ->
-                        IdleFormPrimaryAction(ui.arrived, viewModel)
+                        IdleFormPrimaryAction(ui.idle, viewModel)
 
                     DrivingState.OUTWARD_ACTIVE ->
                         outwardTrip?.let { trip ->
@@ -104,6 +104,7 @@ private fun ArrivalInputsCard(
     onArrivalPlaceChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Carte compacte d'arrivée utilisée en bas d'écran.
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,

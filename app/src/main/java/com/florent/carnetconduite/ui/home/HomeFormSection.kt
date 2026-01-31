@@ -11,12 +11,12 @@ import androidx.compose.ui.unit.dp
 import com.florent.carnetconduite.data.DrivingState
 import com.florent.carnetconduite.data.Trip
 import com.florent.carnetconduite.domain.models.TripGroup
-import com.florent.carnetconduite.ui.home.sections.ArrivedScreen
-import com.florent.carnetconduite.ui.home.sections.CompletedScreen
-import com.florent.carnetconduite.ui.home.sections.IdleScreen
-import com.florent.carnetconduite.ui.home.sections.OutwardActiveScreen
-import com.florent.carnetconduite.ui.home.sections.ReturnActiveScreen
-import com.florent.carnetconduite.ui.home.sections.ReturnReadyScreen
+import com.florent.carnetconduite.ui.home.sections.ArrivedFormContent
+import com.florent.carnetconduite.ui.home.sections.CompletedSummaryContent
+import com.florent.carnetconduite.ui.home.sections.IdleFormContent
+import com.florent.carnetconduite.ui.home.sections.OutwardActiveFormContent
+import com.florent.carnetconduite.ui.home.sections.ReturnActiveFormContent
+import com.florent.carnetconduite.ui.home.sections.ReturnReadyFormContent
 
 @Composable
 fun HomeFormSection(
@@ -35,17 +35,18 @@ fun HomeFormSection(
     ) {
         when (drivingState) {
             DrivingState.IDLE -> {
-                IdleScreen.Content(ui.idle)
+                // Écran de départ: saisie des informations initiales.
+                IdleFormContent(ui.idle)
             }
 
             DrivingState.OUTWARD_ACTIVE -> {
-                // Ton contenu “trajet en cours” sans le bloc d’arrivée
-                OutwardActiveScreen.Content(ui.outward)
+                // Trajet aller en cours (formulaire d'arrivée).
+                OutwardActiveFormContent(ui.outward)
             }
 
             DrivingState.ARRIVED -> {
-                // On garde la logique “décision” ici, mais PAS les inputs km/lieu si on les a déplacés
-                ArrivedScreen.Content(
+                // Décision du trajet retour + info d'arrivée (selon l'emplacement choisi).
+                ArrivedFormContent(
                     state = ui.arrived,
                     showArrivalInputs = showArrivalInputsInForm
                 )
@@ -60,15 +61,20 @@ fun HomeFormSection(
             }
 
             DrivingState.RETURN_READY -> {
-                ReturnReadyScreen.Content(ui.returnReady)
+                // Préparation du retour.
+                returnReadyTrip?.let { trip ->
+                    ReturnReadyFormContent(trip, ui.returnReady)
+                }
             }
 
             DrivingState.RETURN_ACTIVE -> {
-                ReturnActiveScreen.Content(ui.returnActive)
+                // Retour en cours (formulaire de fin).
+                ReturnActiveFormContent(ui.returnActive)
             }
 
             DrivingState.COMPLETED -> {
-                CompletedScreen.Content(tripGroups)
+                // Écran de fin avec résumé.
+                CompletedSummaryContent(tripGroups)
             }
         }
     }

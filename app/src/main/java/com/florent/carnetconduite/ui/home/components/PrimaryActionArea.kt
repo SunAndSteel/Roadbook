@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun PrimaryActionArea(content: @Composable () -> Unit) {
+    // Zone dédiée au CTA principal selon l'état de conduite.
     Column(
         modifier = Modifier
             .fillMaxWidth()
